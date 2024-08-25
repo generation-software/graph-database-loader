@@ -1,0 +1,4 @@
+null	0
+eins	1
+zwei	2
+drei	3
