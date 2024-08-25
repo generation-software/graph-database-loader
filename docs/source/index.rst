@@ -8,7 +8,7 @@ Wilhelm Graph Database Python SDK
 Development
 ===========
 
-Create virtual environment and install dependencies:
+Create virtual environment and install dependencies::
 
     git@github.com:QubitPi/wilhelm-graphdb-python.git
     cd wilhelm-graphdb-python
