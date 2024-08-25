@@ -20,5 +20,5 @@ class TestQuizlet(unittest.TestCase):
     def test_processing_study_set(self):
         self.assertEqual(
             [("null", "0"), ("eins", "1"), ("zwei", "2"), ("drei", "3")],
-            processing_study_set("export.txt"),
+            processing_study_set("tests/export.txt"),
         )
