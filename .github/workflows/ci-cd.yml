@@ -36,10 +36,10 @@ jobs:
           python-version: '3.10'
       - name: Check code style
         run: python setup.py pep8
+      - name: Check import orders
+        run: python setup.py isort
       - name: Run tests
-        run:
-          python setup.py isort
-          python setup.py test
+        run: python setup.py test
       - name: Test dist build
         run: python setup.py sdist
 
