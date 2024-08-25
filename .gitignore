@@ -1,3 +1,16 @@
 .idea/
 .DS_Store
-__pycache__
+venv/
+.venv/
+*.pyc
+__pycache__/
+instance/
+.cache/
+.pytest_cache/
+.coverage
+htmlcov/
+dist/
+build/
+*.egg-info/
+*.swp
+*~

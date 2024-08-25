@@ -16,6 +16,28 @@ To install the SDK, simply run
 pip install wilhelm-graphdb-python
 ```
 
+Example Usage:
+
+1. Make ready a Neo4J database instance. A free one can be obtained at https://console.neo4j.io
+2. Set the following environment variables
+
+   - `NEO4J_URI`- "neo4j://localhost", "neo4j+s://xxx.databases.neo4j.io"
+   - `NEO4J_USERNAME`
+   - `NEO4J_PASSWORD`
+
+   where all of them are available 
+
+3. Export a Quizlet set to a filed named __export.txt__, then
+4. Load vocabulary into Neo4J database:
+
+   ```python
+   from wilhelm_graphdb_python.quizlet import processing_study_set
+   from wilhelm_graphdb_python.neo4j_loader import load_into_database
+   
+   vocabulary = processing_study_set("export.txt")
+   load_into_database(vocabulary)
+   ```
+
 License
 -------
 
@@ -39,4 +61,4 @@ The use and distribution terms for [Wilhelm Graph Database Python SDK]() are cov
 [PyPI project url]: https://pypi.org/project/wilhelm-graphdb-python/
 
 [Read the Docs badge]: https://img.shields.io/readthedocs/wilhelm-graphdb-python?style=for-the-badge&logo=readthedocs&logoColor=white&label=Read%20the%20Docs&labelColor=8CA1AF
-[Read the Docs URL]: https://wilhelm-graphdb-python.readthedocs.io/en/latest/
+[Read the Docs URL]: https://wilhelm-graphdb-python.qubitpi.org
