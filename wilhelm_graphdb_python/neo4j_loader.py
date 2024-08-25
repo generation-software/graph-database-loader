@@ -17,6 +17,7 @@ from neo4j import GraphDatabase
 URI = os.environ["NEO4J_URI"]
 AUTH = (os.environ["NEO4J_USERNAME"], os.environ["NEO4J_PASSWORD"])
 
+
 def load_into_database(vocabulary: list[tuple[str, str]]):
     with GraphDatabase.driver(URI, auth=AUTH) as driver:
         driver.verify_connectivity()

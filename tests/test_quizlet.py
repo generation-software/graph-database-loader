@@ -15,6 +15,7 @@ import unittest
 
 from wilhelm_graphdb_python.quizlet import processing_study_set
 
+
 class TestQuizlet(unittest.TestCase):
 
     def test_processing_study_set(self):
