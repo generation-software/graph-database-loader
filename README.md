@@ -25,7 +25,7 @@ Example Usage:
    - `NEO4J_USERNAME`: the username for connecting the database
    - `NEO4J_PASSWORD`: the user's password for the connection
 
-   where all of them are available 
+   where all of them are available
 
 3. Export a Quizlet set to a filed named __export.txt__, then
 4. Load vocabulary into Neo4J database:
@@ -33,7 +33,7 @@ Example Usage:
    ```python
    from wilhelm_graphdb_python.quizlet import processing_study_set
    from wilhelm_graphdb_python.neo4j_loader import load_into_database
-   
+
    vocabulary = processing_study_set("export.txt")
    load_into_database(vocabulary)
    ```

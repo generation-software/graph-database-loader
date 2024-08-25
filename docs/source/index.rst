@@ -15,6 +15,12 @@ Create virtual environment and install dependencies::
     python3 -m venv .venv
     . .venv/bin/activate
 
+Then generate egg information from the `setup.py` and use the requirements.txt from these egg information to install all
+the dependencies for development::
+
+    python setup.py egg_info
+    pip install -r wilhelm_graphdb_python.egg-info/requires.txt
+
 API Documentation
 =================
 
