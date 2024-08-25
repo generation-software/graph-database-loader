@@ -14,7 +14,6 @@ Create virtual environment and install dependencies::
     cd wilhelm-graphdb-python
     python3 -m venv .venv
     . .venv/bin/activate
-    pip3 install -r requirements.txt
 
 API Documentation
 =================
