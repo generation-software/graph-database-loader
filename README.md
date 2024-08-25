@@ -8,7 +8,7 @@ Wilhelm Graph Database Python SDK
 [![Apache License badge]][Apache License URL]
 
 Wilhelm Graph Database Python SDK offers a programmatic approach that offloads study sets from Quizlet and reloads them
-into Graph Database, such as Neo4J and ArangoDB
+into Graph Database, where [Wilhelm](https://wilhelm.qubitpi.org/) pulls the vocabulary and display them online
 
 To install the SDK, simply run
 
@@ -21,9 +21,9 @@ Example Usage:
 1. Make ready a Neo4J database instance. A free one can be obtained at https://console.neo4j.io
 2. Set the following environment variables
 
-   - `NEO4J_URI`- "neo4j://localhost", "neo4j+s://xxx.databases.neo4j.io"
-   - `NEO4J_USERNAME`
-   - `NEO4J_PASSWORD`
+   - `NEO4J_URI`: the connection URL of the database, such as "neo4j://localhost", "neo4j+s://xxx.databases.neo4j.io"
+   - `NEO4J_USERNAME`: the username for connecting the database
+   - `NEO4J_PASSWORD`: the user's password for the connection
 
    where all of them are available 
 
