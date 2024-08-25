@@ -8,7 +8,7 @@ Wilhelm Graph Database Python SDK
 [![Apache License badge]][Apache License URL]
 
 Wilhelm Graph Database Python SDK offers a programmatic approach that offloads study sets from Quizlet and reloads them
-into Graph Database, where [Wilhelm](https://wilhelm.qubitpi.org/) pulls the vocabulary and display them online
+into Graph Database, where [Wilhelm](https://wilhelm.qubitpi.org/) pulls the vocabularies and display them online
 
 To install the SDK, simply run
 
