@@ -36,8 +36,6 @@ jobs:
           python-version: '3.10'
       - name: Run tests
         run: |
-#          python setup.py pep8
-#          python setup.py isort
           python setup.py test
       - name: Test dist build
         run: python setup.py sdist
