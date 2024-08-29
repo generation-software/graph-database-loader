@@ -13,13 +13,13 @@
 # limitations under the License.
 import unittest
 
-from wilhelm_graphdb_python.quizlet import processing_study_set
+from wilhelm_graphdb_python.neo4j_loader import get_vocabulary
 
 
-class TestQuizlet(unittest.TestCase):
+class TestNeo4jLoader(unittest.TestCase):
 
-    def test_processing_study_set(self):
+    def test_get_vocabulary(self):
         self.assertEqual(
-            [("null", "0"), ("eins", "1"), ("zwei", "2"), ("drei", "3")],
-            processing_study_set("tests/export.txt"),
+            [('null', 0), ('eins', 1), ('Guten Tag', 'Good day'), ('Hallo', 'Hello')],
+            get_vocabulary("tests/test.yaml"),
         )

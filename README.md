@@ -7,8 +7,8 @@ Wilhelm Graph Database Python SDK
 [![GitHub Workflow Status][GitHub Workflow Status badge]][GitHub Workflow Status URL]
 [![Apache License badge]][Apache License URL]
 
-Wilhelm Graph Database Python SDK offers a programmatic approach that offloads study sets from Quizlet and reloads them
-into Graph Database, where [Wilhelm](https://wilhelm.qubitpi.org/) pulls the vocabularies and display them online
+Wilhelm Graph Database Python SDK offers a programmatic approach that uploads language vocabulary into Graph Database,
+where [Wilhelm](https://wilhelm.qubitpi.org/) pulls the vocabularies and display them online
 
 To install the SDK, simply run
 
@@ -27,15 +27,31 @@ Example Usage:
 
    where all of them are available
 
-3. Export a Quizlet set to a filed named __export.txt__, then
+3. Have a vocabulary file of the following YAML format ready at __german.yaml__ (in this example, we are loading a
+   German vocabulary):
+
+   ```yaml
+   vocabulary:
+     - term: "null"
+       definition: 0
+     - term: Guten Tag
+       definition: Good day
+     - term: Hallo
+       definition: Hello
+     - term: Ich heiße ...
+       definition: I am called ...
+     - term: Mein Name ist ...
+       definition: My name is ...
+     - term: bitte
+       definition: please
+   ```
+
 4. Load vocabulary into Neo4J database:
 
    ```python
-   from wilhelm_graphdb_python.quizlet import processing_study_set
    from wilhelm_graphdb_python.neo4j_loader import load_into_database
 
-   vocabulary = processing_study_set("export.txt")
-   load_into_database(vocabulary)
+   load_into_database("german.yaml", "German")
    ```
 
 License

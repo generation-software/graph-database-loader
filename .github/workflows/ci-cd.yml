@@ -40,6 +40,10 @@ jobs:
         run: python setup.py isort
       - name: Run tests
         run: python setup.py test
+        env:
+          NEO4J_URI: test_NEO4J_URI
+          NEO4J_USERNAME: test_NEO4J_USERNAME
+          NEO4J_PASSWORD: test_NEO4J_PASSWORD
       - name: Test dist build
         run: python setup.py sdist
 
