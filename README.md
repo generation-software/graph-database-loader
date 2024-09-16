@@ -7,8 +7,8 @@ Wilhelm Python SDK
 [![GitHub Workflow Status][GitHub Workflow Status badge]][GitHub Workflow Status URL]
 [![Apache License badge]][Apache License URL]
 
-Wilhelm Graph Database Python SDK offers a programmatic approach that uploads language vocabulary into Graph Database,
-where [Wilhelm](https://wilhelm.qubitpi.org/) pulls the vocabularies and display them online
+Wilhelm Python SDK offers a programmatic approach to interact with [Wilhelm](https://wilhelmlang.com/), including its
+graph database, backend webservice, and NLP capabilities
 
 To install the SDK, simply run
 
@@ -16,54 +16,13 @@ To install the SDK, simply run
 pip install wilhelm-python-sdk
 ```
 
-Example Usage:
-
-1. Make ready a Neo4J database instance. A free one can be obtained at https://console.neo4j.io
-2. Set the following environment variables
-
-   - `NEO4J_URI`: the connection URL of the database, such as "neo4j://localhost", "neo4j+s://xxx.databases.neo4j.io"
-   - `NEO4J_USERNAME`: the username for connecting the database
-   - `NEO4J_PASSWORD`: the user's password for the connection
-
-   where all of them are available
-
-3. Have a vocabulary file of the following YAML format ready at __german.yaml__ (in this example, we are loading a
-   German vocabulary):
-
-   ```yaml
-   vocabulary:
-     - term: "null"
-       definition: 0
-     - term: Guten Tag
-       definition: Good day
-     - term: Hallo
-       definition: Hello
-     - term: Ich heiße ...
-       definition: I am called ...
-     - term: Mein Name ist ...
-       definition: My name is ...
-     - term: bitte
-       definition: please
-   ```
-
-4. Load vocabulary into Neo4J database:
-
-   ```python
-   from wilhelm_python_sdk.neo4j_loader import load_into_database
-
-   load_into_database("german.yaml", "German")
-   ```
+Details documentations can be found at [sdk.wilhelmlang.com](https://sdk.wilhelmlang.com/)
 
 License
 -------
 
-The use and distribution terms for [Wilhelm Graph Database Python SDK]() are covered by the [Apache License, Version 2.0].
-
-<div align="center">
-    <a href="https://opensource.org/licenses">
-        <img align="center" width="50%" alt="License Illustration" src="https://github.com/QubitPi/QubitPi/blob/master/img/apache-2.png?raw=true">
-    </a>
-</div>
+The use and distribution terms for [Wilhelm Graph Database Python SDK]() are covered by the
+[Apache License, Version 2.0].
 
 [Apache License badge]: https://img.shields.io/badge/Apache%202.0-F25910.svg?style=for-the-badge&logo=Apache&logoColor=white
 [Apache License URL]: https://www.apache.org/licenses/LICENSE-2.0
