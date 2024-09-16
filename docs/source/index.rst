@@ -49,7 +49,7 @@ Upload Vocabulary CSV into Neo4J
 
   .. code-block:: python
 
-     from wilhelm_graphdb_python.neo4j_loader import load_into_database
+     from wilhelm_python_sdk.neo4j_loader import load_into_database
 
      load_into_database("german.yaml", "German")
 
@@ -84,7 +84,7 @@ If this is an experiment and we would like to empty database,
 API Documentation
 =================
 
-.. automodule:: wilhelm_graphdb_python.quizlet
+.. automodule:: wilhelm_python_sdk.quizlet
    :members:
    :undoc-members:
    :show-inheritance:
@@ -103,4 +103,4 @@ Then generate egg information from the `setup.py` and use the requirements.txt f
 the dependencies for development::
 
     python setup.py egg_info
-    pip install -r wilhelm_graphdb_python.egg-info/requires.txt
+    pip install -r wilhelm_python_sdk.egg-info/requires.txt
