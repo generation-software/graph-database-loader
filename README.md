@@ -49,7 +49,7 @@ Example Usage:
 4. Load vocabulary into Neo4J database:
 
    ```python
-   from wilhelm_graphdb_python.neo4j_loader import load_into_database
+   from wilhelm_python_sdk.neo4j_loader import load_into_database
 
    load_into_database("german.yaml", "German")
    ```
@@ -77,4 +77,4 @@ The use and distribution terms for [Wilhelm Graph Database Python SDK]() are cov
 [PyPI project url]: https://pypi.org/project/wilhelm-python-sdk/
 
 [Read the Docs badge]: https://img.shields.io/readthedocs/wilhelm-python-sdk?style=for-the-badge&logo=readthedocs&logoColor=white&label=Read%20the%20Docs&labelColor=8CA1AF
-[Read the Docs URL]: https://wilhelm-python-sdk.qubitpi.org
+[Read the Docs URL]: https://sdk.wilhelmlang.com
