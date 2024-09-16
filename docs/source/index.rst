@@ -8,26 +8,24 @@ Wilhelm Python SDK
 Install
 =======
 
-To install the SDK, simply run
+To install the SDK, simply run::
 
-```console
-pip install wilhelm-python-sdk
-```
+    pip install wilhelm-python-sdk
 
 Load Wilhelm Vocabularies into Neo4J Database
 =============================================
 
-# Make ready a Neo4J database instance. A free one can be obtained at https://console.neo4j.io
-# Set the following environment variables
+1. Make ready a Neo4J database instance. A free one can be obtained at https://console.neo4j.io
+2. Set the following environment variables
 
-  - `NEO4J_URI`: the connection URL of the database, such as "neo4j://localhost", "neo4j+s://xxx.databases.neo4j.io"
-  - `NEO4J_DATABASE`: the database name, e.g. "my_database"
-  - `NEO4J_USERNAME`: the username for connecting the database
-  - `NEO4J_PASSWORD`: the user's password for the connection
+   - `NEO4J_URI`: the connection URL of the database, such as "neo4j://localhost", "neo4j+s://xxx.databases.neo4j.io"
+   - `NEO4J_DATABASE`: the database name, e.g. "my_database"
+   - `NEO4J_USERNAME`: the username for connecting the database
+   - `NEO4J_PASSWORD`: the user's password for the connection
 
   where all of them are available when database is provisioned on https://console.neo4j.io
 
-# Load vocabulary into Neo4J database:
+3. Load vocabulary into Neo4J database:
 
   .. code-block:: python
 
