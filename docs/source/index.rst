@@ -11,7 +11,7 @@ Install
 To install the SDK, simply run
 
 ```console
-pip install wilhelm-graphdb-python
+pip install wilhelm-python-sdk
 ```
 
 Upload Vocabulary CSV into Neo4J
@@ -94,8 +94,8 @@ Development
 
 Create virtual environment and install dependencies::
 
-    git@github.com:QubitPi/wilhelm-graphdb-python.git
-    cd wilhelm-graphdb-python
+    git@github.com:QubitPi/wilhelm-python-sdk.git
+    cd wilhelm-python-sdk
     python3 -m venv .venv
     . .venv/bin/activate
 

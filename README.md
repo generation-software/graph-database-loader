@@ -1,5 +1,5 @@
-Wilhelm Graph Database Python SDK
-=================================
+Wilhelm Python SDK
+==================
 
 ![Python Version][Python Version Badge]
 [![Read the Docs][Read the Docs badge]][Read the Docs URL]
@@ -13,7 +13,7 @@ where [Wilhelm](https://wilhelm.qubitpi.org/) pulls the vocabularies and display
 To install the SDK, simply run
 
 ```console
-pip install wilhelm-graphdb-python
+pip install wilhelm-python-sdk
 ```
 
 Example Usage:
@@ -69,12 +69,12 @@ The use and distribution terms for [Wilhelm Graph Database Python SDK]() are cov
 [Apache License URL]: https://www.apache.org/licenses/LICENSE-2.0
 [Apache License, Version 2.0]: http://www.apache.org/licenses/LICENSE-2.0.html
 
-[GitHub Workflow Status badge]: https://img.shields.io/github/actions/workflow/status/QubitPi/wilhelm-graphdb-python/ci-cd.yml?logo=github&style=for-the-badge
-[GitHub Workflow Status URL]: https://github.com/QubitPi/wilhelm-graphdb-python/actions/workflows/ci-cd.yml
+[GitHub Workflow Status badge]: https://img.shields.io/github/actions/workflow/status/QubitPi/wilhelm-python-sdk/ci-cd.yml?logo=github&style=for-the-badge
+[GitHub Workflow Status URL]: https://github.com/QubitPi/wilhelm-python-sdk/actions/workflows/ci-cd.yml
 
 [Python Version Badge]: https://img.shields.io/badge/Python-3.10-brightgreen?style=for-the-badge&logo=python&logoColor=white
-[PyPI project badge]: https://img.shields.io/pypi/v/wilhelm-graphdb-python?logo=pypi&logoColor=white&style=for-the-badge
-[PyPI project url]: https://pypi.org/project/wilhelm-graphdb-python/
+[PyPI project badge]: https://img.shields.io/pypi/v/wilhelm-python-sdk?logo=pypi&logoColor=white&style=for-the-badge
+[PyPI project url]: https://pypi.org/project/wilhelm-python-sdk/
 
-[Read the Docs badge]: https://img.shields.io/readthedocs/wilhelm-graphdb-python?style=for-the-badge&logo=readthedocs&logoColor=white&label=Read%20the%20Docs&labelColor=8CA1AF
-[Read the Docs URL]: https://wilhelm-graphdb-python.qubitpi.org
+[Read the Docs badge]: https://img.shields.io/readthedocs/wilhelm-python-sdk?style=for-the-badge&logo=readthedocs&logoColor=white&label=Read%20the%20Docs&labelColor=8CA1AF
+[Read the Docs URL]: https://wilhelm-python-sdk.qubitpi.org
