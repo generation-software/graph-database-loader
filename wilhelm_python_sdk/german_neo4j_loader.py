@@ -21,6 +21,7 @@ from neo4j import GraphDatabase
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 
 URI = os.environ["NEO4J_URI"]
+DATABASE = os.environ["NEO4J_DATABASE"]
 AUTH = (os.environ["NEO4J_USERNAME"], os.environ["NEO4J_PASSWORD"])
 
 GERMAN = "German"
@@ -90,7 +91,7 @@ def save_a_node_with_attributes(driver, node_type: str, attributes: dict):
     records = driver.execute_query(
         f"MATCH (node:{node_type}) WHERE node.name = $name RETURN node",
         name=attributes["name"],
-        database_="neo4j",
+        database_=DATABASE,
     ).records
 
     if len(records) == 0:
@@ -98,7 +99,7 @@ def save_a_node_with_attributes(driver, node_type: str, attributes: dict):
         summary = driver.execute_query(
             f"CREATE (node:{node_type} $attributes) RETURN node",
             attributes=attributes,
-            database_="neo4j",
+            database_=DATABASE,
         ).summary
     else:
         logging.info(f"node: {attributes} already exists in database")
