@@ -28,7 +28,7 @@ The use and distribution terms for [Wilhelm Graph Database Python SDK]() are cov
 [Apache License URL]: https://www.apache.org/licenses/LICENSE-2.0
 [Apache License, Version 2.0]: http://www.apache.org/licenses/LICENSE-2.0.html
 
-[GitHub Workflow Status badge]: https://img.shields.io/github/actions/workflow/status/QubitPi/wilhelm-python-sdk/ci-cd.yml?logo=github&style=for-the-badge
+[GitHub Workflow Status badge]: https://img.shields.io/github/actions/workflow/status/QubitPi/wilhelm-python-sdk/ci-cd.yml?logo=github&style=for-the-badge&label=CI/CD
 [GitHub Workflow Status URL]: https://github.com/QubitPi/wilhelm-python-sdk/actions/workflows/ci-cd.yml
 
 [Python Version Badge]: https://img.shields.io/badge/Python-3.10-brightgreen?style=for-the-badge&logo=python&logoColor=white
