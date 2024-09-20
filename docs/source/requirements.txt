@@ -5,3 +5,6 @@ sphinx-rtd-theme==1.0.0
 pycodestyle
 requests
 pyan3
+neo4j
+pyyaml
+beautifulsoup4
