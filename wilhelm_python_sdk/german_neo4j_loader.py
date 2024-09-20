@@ -13,10 +13,12 @@
 # limitations under the License.
 import logging
 import os
-import re
 
-import yaml
 from neo4j import GraphDatabase
+
+from wilhelm_python_sdk.vocabulary_database_loader import (
+    GERMAN, get_definitions, get_vocabulary, save_a_link_with_attributes,
+    save_a_node_with_attributes)
 
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 
@@ -24,101 +26,27 @@ URI = os.environ["NEO4J_URI"]
 DATABASE = os.environ["NEO4J_DATABASE"]
 AUTH = (os.environ["NEO4J_USERNAME"], os.environ["NEO4J_PASSWORD"])
 
-GERMAN = "German"
+
+def __is_a_noun(word: object) -> bool:
+    return word["term"].startswith(("der"))
+    # return word["term"].startswith(("der", "die", "das"))
 
 
-def get_vocabulary(yaml_path: str) -> list:
-    with open(yaml_path, "r") as f:
-        return yaml.safe_load(f)["vocabulary"]
+def get_attributes(word: object) -> dict:
+    attributes = {"name": word["term"], "language": GERMAN}
 
+    if __is_a_noun(word):
+        declension = word["declension"]
 
-def get_definitions(word) -> list[(str, str)]:
-    """
-    Extract definitions from a word as a list of bi-tuples, with the first element being the predicate and the second
-    being the definition.
+        declension_table = {}
+        for i, row in enumerate(declension):
+            declension_table[i] = {}
+            for j, col in enumerate(row):
+                declension_table[i][j] = declension[i][j]
 
-    For example::
+        attributes["declension"] = declension_table
 
-    definition:
-      - term: nämlich
-        definition:
-          - (adj.) same
-          - (adv.) namely
-          - because
-
-    The method will return `[("adj.", "same"), ("adv.", "namely"), (None, "because")]`
-
-    The method works for the single-definition case, i.e.::
-
-    definition:
-      - term: na klar
-        definition:
-
-    returns a list of one tupple `[(None, "of course")]`
-
-    Note that any definition are converted to string. If the word does not contain a field named exactly "definition", a
-    ValueError is raised.
-
-    :param word:  A dictionary that contains a "definition" key whose value is either a single-value or a list of
-                  single-values
-    :return: a list of two-element tuples, where the first element being the predicate (can be `None`) and the second
-             being the definition
-    """
-    logging.info("Extracting definitions from {}".format(word))
-
-    if "definition" not in word:
-        raise ValueError("{} does not contain 'definition' field. Maybe there is a typo".format(word))
-
-    predicate_with_definition = []
-
-    definitions = [word["definition"]] if not isinstance(word["definition"], list) else word["definition"]
-
-    for definition in definitions:
-        definition = str(definition)
-
-        definition = definition.strip()
-
-        match = re.match(r"\((.*?)\)", definition)
-        if match:
-            predicate_with_definition.append((match.group(1), re.sub(r'\(.*?\)', '', definition).strip()))
-        else:
-            predicate_with_definition.append((None, definition))
-
-    return predicate_with_definition
-
-
-def save_a_node_with_attributes(driver, node_type: str, attributes: dict):
-    records = driver.execute_query(
-        f"MATCH (node:{node_type}) WHERE node.name = $name RETURN node",
-        name=attributes["name"],
-        database_=DATABASE,
-    ).records
-
-    if len(records) == 0:
-        logging.info(f"Creating node {attributes}...")
-        summary = driver.execute_query(
-            f"CREATE (node:{node_type} $attributes) RETURN node",
-            attributes=attributes,
-            database_=DATABASE,
-        ).summary
-    else:
-        logging.info(f"node: {attributes} already exists in database")
-
-
-def save_a_link_with_attributes(driver, source_name: str, target_name: str, attributes: dict):
-    driver.execute_query(
-        """
-        MATCH
-            (term:Term WHERE term.name = $term AND term.language = $language),
-            (definition:Definition WHERE definition.name = $definition)
-        CREATE
-            (term)-[:DEFINITION $attributes]->(definition)
-        """,
-        term=source_name,
-        language=GERMAN,
-        definition=target_name,
-        attributes=attributes
-    )
+    return attributes
 
 
 def load_into_database(yaml_path: str):
@@ -134,7 +62,8 @@ def load_into_database(yaml_path: str):
 
     for word in vocabulary:
         term = word["term"]
-        save_a_node_with_attributes(driver, "Term", {"name": term, "language": GERMAN})
+
+        save_a_node_with_attributes(driver, "Term", get_attributes(word))
 
         definitions = get_definitions(word)
         for definition_with_predicate in definitions:
@@ -144,6 +73,6 @@ def load_into_database(yaml_path: str):
             save_a_node_with_attributes(driver, "Definition", {"name": definition})
 
             if predicate:
-                save_a_link_with_attributes(driver, term, definition, {"name": predicate})
+                save_a_link_with_attributes(GERMAN, driver, term, definition, {"name": predicate})
             else:
-                save_a_link_with_attributes(driver, term, definition, {"name": "definition"})
+                save_a_link_with_attributes(GERMAN, driver, term, definition, {"name": "definition"})
