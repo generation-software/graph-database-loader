@@ -19,22 +19,7 @@ except ImportError:
     from bs4 import BeautifulSoup
 
 
-def parse_all_conjugation_tables(url: str) -> dict:
-    html = requests.get(url).text
-
-    parsed_html = BeautifulSoup(html)
-
-    tables = parsed_html.body.find_all("div", attrs={"class": "NavFrame"})
-
-    conjugation_tables = {}
-    for table in tables:
-        tense, conjugation_table = parse_single_conjugation_table(table)
-        conjugation_tables[tense] = conjugation_table
-
-    return conjugation_tables
-
-
-def parse_single_conjugation_table(table):
+def __parse_single_conjugation_table(table):
     tense = table.find("div", attrs={"class": "NavHead"}).text.strip()
 
     table = table.find('table', attrs={'class': 'grc-conj'})
@@ -103,3 +88,57 @@ def parse_single_conjugation_table(table):
     # widths = [max(map(len, col)) for col in zip(*conjugation_table)]
     # for row in conjugation_table:
     #     print("- [" + ", ".join((val.ljust(width) for val, width in zip(row, widths))) + "]")
+
+
+def parse_all_conjugation_tables(url: str) -> dict:
+    """
+    Given a Wiktionary URL, for example `https://en.wiktionary.org/wiki/λέγω`, returns a conjugation map from tense as
+    key to the conjugation table as value.
+
+    Take `ἔχω <https://en.wiktionary.org/wiki/ἔχω#Inflection>`_ as an example,
+
+    .. code-block:: python
+
+       from wilhelm_python_sdk.ancient_greek_wiktionary_parser import parse_all_conjugation_tables
+
+       tables = parse_all_conjugation_tables("https://en.wiktionary.org/wiki/ἔχω")
+
+    shall produce a dictionary of 12 key-value pairs::
+
+        "Present: ἔχω, ἔχομαι": [
+            [number        , number     , singular, singular  , singular, dual    , dual          , plural        , plural        , plural        ]  # noqa: E501
+            [              ,            , first   , second    , third   , second  , third         , first         , second        , third         ]
+            [active        , indicative , ἔχω     , ἔχεις     , ἔχει    , ἔχετον  , ἔχετον        , ἔχομεν        , ἔχετε         , ἔχουσῐ(ν)     ]
+            [active        , subjunctive, ἔχω     , ἔχῃς      , ἔχῃ     , ἔχητον  , ἔχητον        , ἔχωμεν        , ἔχητε         , ἔχωσῐ(ν)      ]
+            [active        , optative   , ἔχοιμῐ  , ἔχοις     , ἔχοι    , ἔχοιτον , ἐχοίτην       , ἔχοιμεν       , ἔχοιτε        , ἔχοιεν        ]
+            [active        , imperative ,         , ἔχε       , ἐχέτω   , ἔχετον  , ἐχέτων        ,               , ἔχετε         , ἐχόντων       ]
+            [middle/passive, indicative , ἔχομαι  , "ἔχῃ,ἔχει", ἔχεται  , ἔχεσθον , ἔχεσθον       , ἐχόμεθᾰ       , ἔχεσθε        , ἔχονται       ]
+            [middle/passive, subjunctive, ἔχωμαι  , ἔχῃ       , ἔχηται  , ἔχησθον , ἔχησθον       , ἐχώμεθᾰ       , ἔχησθε        , ἔχωνται       ]
+            [middle/passive, optative   , ἐχοίμην , ἔχοιο     , ἔχοιτο  , ἔχοισθον, ἐχοίσθην      , ἐχοίμεθᾰ      , ἔχοισθε       , ἔχοιντο       ]
+            [middle/passive, imperative ,         , ἔχου      , ἐχέσθω  , ἔχεσθον , ἐχέσθων       ,               , ἔχεσθε        , ἐχέσθων       ]
+            [              ,            , active  , active    , active  , active  , middle/passive, middle/passive, middle/passive, middle/passive]
+            [infinitive    , infinitive , ἔχειν   , ἔχειν     , ἔχειν   , ἔχειν   , ἔχεσθαι       , ἔχεσθαι       , ἔχεσθαι       , ἔχεσθαι       ]
+            [participle    , m          , ἔχων    , ἔχων      , ἔχων    , ἔχων    , ἐχόμενος      , ἐχόμενος      , ἐχόμενος      , ἐχόμενος      ]
+            [participle    , f          , ἔχουσᾰ  , ἔχουσᾰ    , ἔχουσᾰ  , ἔχουσᾰ  , ἐχομένη       , ἐχομένη       , ἐχομένη       , ἐχομένη       ]
+            [participle    , n          , ἔχον    , ἔχον      , ἔχον    , ἔχον    , ἐχόμενον      , ἐχόμενον      , ἐχόμενον      , ἐχόμενον      ]
+        ],
+        "Present: ἔχω, ἔχομαι (Epic)": [...],
+        "Imperfect: εἶχον, εἰχόμην": [...],
+        ...
+
+    :param url:  A valid Wiktionary URL pointing to an Ancient Greek Wiktionary page.
+
+    :return: a mapping from tense to its conjugation
+    """
+    html = requests.get(url).text
+
+    parsed_html = BeautifulSoup(html)
+
+    tables = parsed_html.body.find_all("div", attrs={"class": "NavFrame"})
+
+    conjugation_tables = {}
+    for table in tables:
+        tense, conjugation_table = __parse_single_conjugation_table(table)
+        conjugation_tables[tense] = conjugation_table
+
+    return conjugation_tables
