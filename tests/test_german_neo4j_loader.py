@@ -13,35 +13,40 @@
 # limitations under the License.
 import unittest
 
-from wilhelm_python_sdk.german_neo4j_loader import get_definitions
+import yaml
+
+from wilhelm_python_sdk.german_neo4j_loader import get_attributes
 
 
-class TestNeo4jLoader(unittest.TestCase):
+class TestGermanNeo4JLoader(unittest.TestCase):
 
     def test_get_definitions(self):
         self.assertEqual(
-            [("adj.", "same"), ("adv.", "namely"), (None, "because")],
-            get_definitions({
-                "definition": ["(adj.) same", "(adv.) namely", "because"]
-            }),
+            {
+                "name": "der Hut",
+                "language": "German",
+                "declension": {
+                    0: {0: "",           1: "singular", 2: "singular", 3: "singular",    4: "plural", 5: "plural"},
+                    1: {0: "",           1: "indef.",   2: "def.",     3: "noun",        4: "def.",   5: "noun"},
+                    2: {0: "nominative", 1: "ein",      2: "der",      3: "Hut",         4: "die",    5: "Hüte"},
+                    3: {0: "genitive",   1: "eines",    2: "des",      3: "Hutes, Huts", 4: "der",    5: "Hüte"},
+                    4: {0: "dative",     1: "einem",    2: "dem",      3: "Hut",         4: "den",    5: "Hüten"},
+                    5: {0: "accusative", 1: "einen",    2: "den",      3: "Hut",         4: "die",    5: "Hüte"}
+                }
+            },
+            get_attributes(
+                yaml.safe_load(
+                    """
+                    term: der Hut
+                    definition: the hat
+                    declension:
+                      - ["",         singular, singular, singular,      plural, plural]
+                      - ["",         indef.,   def.,     noun,          def.,   noun  ]
+                      - [nominative, ein,      der,      Hut,           die,    Hüte  ]
+                      - [genitive,   eines,    des,      "Hutes, Huts", der,    Hüte  ]
+                      - [dative,     einem,    dem,      Hut,           den,    Hüten ]
+                      - [accusative, einen,    den,      Hut,           die,    Hüte  ]
+                    """
+                )
+            ),
         )
-
-    def test_single_definition_term(self):
-        self.assertEqual(
-            [(None, "one")],
-            get_definitions({
-                "definition": "one"
-            }),
-        )
-
-    def test_numerical_definition(self):
-        self.assertEqual(
-            [(None, "1")],
-            get_definitions({
-                "definition": 1
-            }),
-        )
-
-    def test_missing_definition(self):
-        with self.assertRaises(ValueError):
-            get_definitions({"defintion": "I'm 23 years old."})
