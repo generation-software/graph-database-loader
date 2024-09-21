@@ -38,13 +38,9 @@ def get_attributes(word: object) -> dict:
     if __is_a_noun(word):
         declension = word["declension"]
 
-        declension_table = {}
         for i, row in enumerate(declension):
-            declension_table[i] = {}
             for j, col in enumerate(row):
-                declension_table[i][j] = declension[i][j]
-
-        attributes["declension"] = declension_table
+                attributes[f"declension-{i}-{j}"] = declension[i][j]
 
     return attributes
 
