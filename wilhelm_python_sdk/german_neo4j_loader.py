@@ -27,15 +27,34 @@ DATABASE = os.environ["NEO4J_DATABASE"]
 AUTH = (os.environ["NEO4J_USERNAME"], os.environ["NEO4J_PASSWORD"])
 
 
-def __is_a_noun(word: object) -> bool:
+def is_noun(word: object) -> bool:
     return word["term"].startswith(("der"))
     # return word["term"].startswith(("der", "die", "das"))
+
+
+def is_adjectival_noun(word: object) -> bool:
+    return is_noun(word) and is_adjective(word)
+
+
+def is_adjective(word: object) -> bool:
+    """
+    Returns whether or not a German word is an adjective.
+
+    :param word:  A YAML vocabulary item as a Dict from wilhelm-vocabulary
+
+    :return: `True` if the vocabulary is a German adjective, or `False` otherwise
+    """
+    return "declension" in word and all(
+        key in word["declension"] for key in ["strong declension (without article)",
+                                              "weak declension (with definite article)",
+                                              "mixed declension (with indefinite article)"]
+    )
 
 
 def get_attributes(word: object) -> dict:
     attributes = {"name": word["term"], "language": GERMAN}
 
-    if __is_a_noun(word):
+    if is_noun(word) and not is_adjectival_noun(word):
         declension = word["declension"]
 
         for i, row in enumerate(declension):
