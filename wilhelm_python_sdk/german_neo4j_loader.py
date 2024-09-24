@@ -40,6 +40,23 @@ def is_adjective(word: object) -> bool:
     """
     Returns whether or not a German word is an adjective.
 
+    A word is an adjective if it contains a "declension" field with the following 3 sub-fields:
+
+    1. strong declension (without article)
+    2. weak declension (with definite article)
+    3. mixed declension (with indefinite article)
+
+    For example, the following entry represents an adjective:
+
+    .. code-block:: python
+
+       - term: interessiert
+         definition: (adj.) interested
+         declension:
+           strong declension (without article): ...
+           weak declension (with definite article): ...
+           mixed declension (with indefinite article): ...
+
     :param word:  A YAML vocabulary item as a Dict from wilhelm-vocabulary
 
     :return: `True` if the vocabulary is a German adjective, or `False` otherwise

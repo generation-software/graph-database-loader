@@ -24,6 +24,8 @@ DATABASE = os.environ["NEO4J_DATABASE"]
 AUTH = (os.environ["NEO4J_USERNAME"], os.environ["NEO4J_PASSWORD"])
 
 GERMAN = "German"
+LATIN = "Latin"
+ANCIENT_GREEK = "Ancient Greek"
 
 
 def get_vocabulary(yaml_path: str) -> list:
