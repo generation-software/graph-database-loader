@@ -16,9 +16,13 @@ import os
 
 from neo4j import GraphDatabase
 
-from wilhelm_python_sdk.vocabulary_database_loader import (
-    GERMAN, get_definitions, get_vocabulary, save_a_link_with_attributes,
-    save_a_node_with_attributes)
+from wilhelm_python_sdk.vocabulary_database_loader import GERMAN
+from wilhelm_python_sdk.vocabulary_database_loader import get_definitions
+from wilhelm_python_sdk.vocabulary_database_loader import get_vocabulary
+from wilhelm_python_sdk.vocabulary_database_loader import \
+    save_a_link_with_attributes
+from wilhelm_python_sdk.vocabulary_database_loader import \
+    save_a_node_with_attributes
 
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 
@@ -68,15 +72,49 @@ def is_adjective(word: object) -> bool:
     )
 
 
+def get_noun_attributes(word: object) -> dict:
+    """
+    Returns noun-specific attributes as a flat map.
+
+    If the noun's declension is, for some reasons, "Unknown", this function will return an empty dict. Otherwise, the
+    declension table is flattened like with row-col index in the map key::
+
+    "declension-0-0": "",
+    "declension-0-1": "singular",
+    "declension-0-2": "singular",
+    "declension-0-3": "singular",
+    "declension-0-4": "plural",
+    "declension-0-5": "plural",
+
+    :param word:  A vocabulary representing a German noun
+
+    :return: a flat map containing all the YAML encoded information about the noun excluding term and definition
+    """
+    declension = word["declension"]
+
+    if declension == "Unknown":
+        return {}
+
+    attributes = {}
+    for i, row in enumerate(declension):
+        for j, col in enumerate(row):
+            attributes[f"declension-{i}-{j}"] = declension[i][j]
+
+    return attributes
+
+
 def get_attributes(word: object) -> dict:
+    """
+    Returns a flat map as the Term node properties stored in Neo4J.
+
+    :param word:  A German vocabulary representing
+
+    :return: a flat map containing all the YAML encoded information about the vocabulary
+    """
     attributes = {"name": word["term"], "language": GERMAN}
 
     if is_noun(word) and not is_adjectival_noun(word):
-        declension = word["declension"]
-
-        for i, row in enumerate(declension):
-            for j, col in enumerate(row):
-                attributes[f"declension-{i}-{j}"] = declension[i][j]
+        attributes = attributes | get_noun_attributes(word)
 
     return attributes
 

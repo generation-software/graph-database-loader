@@ -16,9 +16,13 @@ import os
 
 from neo4j import GraphDatabase
 
-from wilhelm_python_sdk.vocabulary_database_loader import (
-    LATIN, get_definitions, get_vocabulary, save_a_link_with_attributes,
-    save_a_node_with_attributes)
+from wilhelm_python_sdk.vocabulary_database_loader import LATIN
+from wilhelm_python_sdk.vocabulary_database_loader import get_definitions
+from wilhelm_python_sdk.vocabulary_database_loader import get_vocabulary
+from wilhelm_python_sdk.vocabulary_database_loader import \
+    save_a_link_with_attributes
+from wilhelm_python_sdk.vocabulary_database_loader import \
+    save_a_node_with_attributes
 
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 
