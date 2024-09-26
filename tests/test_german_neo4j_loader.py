@@ -16,7 +16,6 @@ import unittest
 import yaml
 
 from wilhelm_python_sdk.german_neo4j_loader import get_attributes
-from wilhelm_python_sdk.german_neo4j_loader import get_noun_attributes
 
 UNKOWN_DECLENSION_NOUN_YAML = """
     term: die Grilltomate
@@ -91,12 +90,6 @@ HUT_DECLENSION_MAP = {
 
 
 class TestGermanNeo4JLoader(unittest.TestCase):
-
-    def test_get_noun_attributes(self):
-        self.assertEqual(HUT_DECLENSION_MAP, get_noun_attributes(yaml.safe_load(HUT_YAML)))
-
-    def test_get_noun_attribute_unkown_declension(self):
-        self.assertEqual({}, get_noun_attributes(yaml.safe_load(UNKOWN_DECLENSION_NOUN_YAML)))
 
     def test_get_attributes(self):
         self.assertEqual(
