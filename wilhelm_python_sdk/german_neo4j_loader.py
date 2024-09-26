@@ -31,16 +31,7 @@ DATABASE = os.environ["NEO4J_DATABASE"]
 AUTH = (os.environ["NEO4J_USERNAME"], os.environ["NEO4J_PASSWORD"])
 
 
-def is_noun(word: object) -> bool:
-    return word["term"].startswith(("der"))
-    # return word["term"].startswith(("der", "die", "das"))
-
-
-def is_adjectival_noun(word: object) -> bool:
-    return is_noun(word) and word["definition"].startswith("(adjectival noun)")
-
-
-def get_noun_attributes(word: object) -> dict:
+def get_declension_attributes(word: object) -> dict:
     """
     Returns noun-specific attributes as a flat map.
 
@@ -58,6 +49,7 @@ def get_noun_attributes(word: object) -> dict:
 
     :return: a flat map containing all the YAML encoded information about the noun excluding term and definition
     """
+
     declension = word["declension"]
 
     if declension == "Unknown":
@@ -81,8 +73,8 @@ def get_attributes(word: object) -> dict:
     """
     attributes = {"name": word["term"], "language": GERMAN}
 
-    if is_noun(word) and not is_adjectival_noun(word):
-        attributes = attributes | get_noun_attributes(word)
+    if "declension" in word:
+        attributes = attributes | get_declension_attributes(word)
 
     return attributes
 
