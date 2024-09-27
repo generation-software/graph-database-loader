@@ -88,49 +88,55 @@ def get_definitions(word) -> list[(str, str)]:
     return predicate_with_definition
 
 
-def save_a_node_with_attributes(driver, node_type: str, attributes: dict):
+def node_with_label_exists(label: str, node_type: str, driver):
     records = driver.execute_query(
         f"MATCH (node:{node_type}) WHERE node.name = $name RETURN node",
-        name=attributes["name"],
+        name=label,
         database_=DATABASE,
     ).records
 
-    if len(records) == 0:
-        logging.info(f"Creating node {attributes}...")
-        summary = driver.execute_query(
-            f"CREATE (node:{node_type} $attributes) RETURN node",
-            attributes=attributes,
-            database_=DATABASE,
-        ).summary
-    else:
+    return len(records) > 0
+
+
+def save_a_node_with_attributes(driver, node_type: str, attributes: dict):
+    if node_with_label_exists(attributes["name"], node_type, driver):
         logging.info(f"node: {attributes} already exists in database")
+        return
+
+    logging.info(f"Creating node {attributes}...")
+    summary = driver.execute_query(
+        f"CREATE (node:{node_type} $attributes) RETURN node",
+        attributes=attributes,
+        database_=DATABASE,
+    ).summary
 
 
 def save_a_link_with_attributes(language: str, driver, source_name: str, target_name: str, attributes: dict):
-    driver.execute_query(
-        """
-        MATCH
-            (term:Term WHERE term.name = $term AND term.language = $language),
-            (definition:Definition WHERE definition.name = $definition)
-        CREATE
-            (term)-[:DEFINITION $attributes]->(definition)
-        """,
-        term=source_name,
-        language=language,
-        definition=target_name,
-        attributes=attributes
-    )
-
-    driver.execute_query(
-        """
-        MATCH
-            (term:Term WHERE term.name = $term AND term.language = $language),
-            (related:Term WHERE related.name = $related_term AND term.language = $language)
-        CREATE
-            (term)-[:related $attributes]->(related)
-        """,
-        term=source_name,
-        language=language,
-        related_term=target_name,
-        attributes=attributes
-    )
+    if node_with_label_exists(target_name, "Term", driver):
+        driver.execute_query(
+            """
+            MATCH
+                (term:Term WHERE term.name = $term AND term.language = $language),
+                (related:Term WHERE related.name = $related_term AND term.language = $language)
+            CREATE
+                (term)-[:RELATED $attributes]->(related)
+            """,
+            term=source_name,
+            language=language,
+            related_term=target_name,
+            attributes=attributes
+        )
+    else:
+        driver.execute_query(
+            """
+            MATCH
+                (term:Term WHERE term.name = $term AND term.language = $language),
+                (definition:Definition WHERE definition.name = $definition)
+            CREATE
+                (term)-[:DEFINITION $attributes]->(definition)
+            """,
+            term=source_name,
+            language=language,
+            definition=target_name,
+            attributes=attributes
+        )
