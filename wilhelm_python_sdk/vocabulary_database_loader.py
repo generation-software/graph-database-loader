@@ -120,3 +120,17 @@ def save_a_link_with_attributes(language: str, driver, source_name: str, target_
         definition=target_name,
         attributes=attributes
     )
+
+    driver.execute_query(
+        """
+        MATCH
+            (term:Term WHERE term.name = $term AND term.language = $language),
+            (related:Term WHERE related.name = $related_term AND term.language = $language)
+        CREATE
+            (term)-[:related $attributes]->(related)
+        """,
+        term=source_name,
+        language=language,
+        related_term=target_name,
+        attributes=attributes
+    )
