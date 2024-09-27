@@ -91,17 +91,18 @@ def load_into_database(yaml_path: str):
     vocabulary = get_vocabulary(yaml_path)
 
     for word in vocabulary:
-        term = word["term"]
-
         save_a_node_with_attributes(driver, "Term", get_attributes(word))
+        definitions = get_definitions(word)
+        for definition_with_predicate in definitions:
+            definition = definition_with_predicate[1]
+            save_a_node_with_attributes(driver, "Definition", {"name": definition})
 
+    for word in vocabulary:
         definitions = get_definitions(word)
         for definition_with_predicate in definitions:
             predicate = definition_with_predicate[0]
             definition = definition_with_predicate[1]
-
-            save_a_node_with_attributes(driver, "Definition", {"name": definition})
-
+            term = word["term"]
             if predicate:
                 save_a_link_with_attributes(GERMAN, driver, term, definition, {"name": predicate})
             else:
