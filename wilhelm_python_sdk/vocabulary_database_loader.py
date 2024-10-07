@@ -111,9 +111,9 @@ def save_a_node_with_attributes(driver, node_type: str, attributes: dict):
     ).summary
 
 
-def save_a_link_with_attributes(language: str, driver, source_name: str, target_name: str, attributes: dict):
-    if node_with_label_exists(target_name, "Term", driver):
-        driver.execute_query(
+def save_a_link_with_attributes(language: str, database_driver, source_name: str, target_name: str, attributes: dict):
+    if node_with_label_exists(target_name, "Term", database_driver):
+        database_driver.execute_query(
             """
             MATCH
                 (term:Term WHERE term.name = $term AND term.language = $language),
@@ -127,7 +127,7 @@ def save_a_link_with_attributes(language: str, driver, source_name: str, target_
             attributes=attributes
         )
     else:
-        driver.execute_query(
+        database_driver.execute_query(
             """
             MATCH
                 (term:Term WHERE term.name = $term AND term.language = $language),

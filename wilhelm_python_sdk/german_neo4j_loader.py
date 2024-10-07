@@ -31,7 +31,7 @@ DATABASE = os.environ["NEO4J_DATABASE"]
 AUTH = (os.environ["NEO4J_USERNAME"], os.environ["NEO4J_PASSWORD"])
 
 
-def get_declension_attributes(word: object) -> dict:
+def get_declension_attributes(word: object) -> dict[str, str]:
     """
     Returns noun-specific attributes as a flat map.
 
@@ -63,7 +63,7 @@ def get_declension_attributes(word: object) -> dict:
     return attributes
 
 
-def get_attributes(word: object) -> dict:
+def get_attributes(word: object) -> dict[str, str]:
     """
     Returns a flat map as the Term node properties stored in Neo4J.
 
@@ -79,6 +79,66 @@ def get_attributes(word: object) -> dict:
     return attributes
 
 
+def update_link_hints(link_hints: dict[str, str], attributes: dict[str, str], term: str):
+    """
+    Update and prepare a mapping between shared attribute values (key) to the term that has that attribute (value).
+
+    This mapping will be used to create more links in graph database.
+
+    The operation calling this method was inspired by the spotting the relationship between "die Reise" and "der Reis"
+    who share large portions of their declension table. In this case, there will be a link between "die Reise" and
+    "der Reis". Linking the vocabulary this way helps memorize vocabulary more efficiently
+
+    :param link_hints:  The mapping
+    :param attributes:  The source of mapping hints
+    :param term:  the term that has the attribute
+    """
+    for value in attributes.values():
+        link_hints[value] = term
+    return link_hints
+
+
+def save_relationships_between_term_and_definitions(vocabulary, driver):
+    for word in vocabulary:
+        definitions = get_definitions(word)
+        for definition_with_predicate in definitions:
+            predicate = definition_with_predicate[0]
+            definition = definition_with_predicate[1]
+            term = word["term"]
+            if predicate:
+                save_a_link_with_attributes(
+                    language=GERMAN,
+                    database_driver=driver,
+                    source_name=term,
+                    target_name=definition,
+                    attributes={"name": predicate}
+                )
+            else:
+                save_a_link_with_attributes(
+                    language=GERMAN,
+                    database_driver=driver,
+                    source_name=term,
+                    target_name=definition,
+                    attributes={"name": "definition"}
+                )
+
+
+def save_link_hints_relationships(link_hints, vocabulary, driver):
+    for word in vocabulary:
+        term = word["term"]
+        attributes = get_attributes(word)
+
+        for attribute_value in attributes.values():
+            if attribute_value in link_hints:
+                save_a_link_with_attributes(
+                    language=GERMAN,
+                    database_driver=driver,
+                    source_name=term,
+                    target_name=link_hints[attribute_value],
+                    attributes={"name": "sharing declensions"}
+                )
+
+
 def load_into_database(yaml_path: str):
     """
     Upload https://github.com/QubitPi/wilhelm-vocabulary/blob/master/german.yaml to Neo4j Database.
@@ -89,21 +149,18 @@ def load_into_database(yaml_path: str):
         driver.verify_connectivity()
 
     vocabulary = get_vocabulary(yaml_path)
+    link_hints = {}
 
     for word in vocabulary:
-        save_a_node_with_attributes(driver, "Term", get_attributes(word))
+        attributes = get_attributes(word)
+
+        link_hints = update_link_hints(link_hints, attributes, word["term"])
+
+        save_a_node_with_attributes(driver, "Term", attributes)
         definitions = get_definitions(word)
         for definition_with_predicate in definitions:
             definition = definition_with_predicate[1]
             save_a_node_with_attributes(driver, "Definition", {"name": definition})
 
-    for word in vocabulary:
-        definitions = get_definitions(word)
-        for definition_with_predicate in definitions:
-            predicate = definition_with_predicate[0]
-            definition = definition_with_predicate[1]
-            term = word["term"]
-            if predicate:
-                save_a_link_with_attributes(GERMAN, driver, term, definition, {"name": predicate})
-            else:
-                save_a_link_with_attributes(GERMAN, driver, term, definition, {"name": "definition"})
+    save_relationships_between_term_and_definitions(vocabulary, driver)
+    save_link_hints_relationships(link_hints, vocabulary, driver)

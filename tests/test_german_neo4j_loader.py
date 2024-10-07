@@ -16,6 +16,7 @@ import unittest
 import yaml
 
 from wilhelm_python_sdk.german_neo4j_loader import get_attributes
+from wilhelm_python_sdk.german_neo4j_loader import update_link_hints
 
 UNKOWN_DECLENSION_NOUN_YAML = """
     term: die Grilltomate
@@ -95,4 +96,10 @@ class TestGermanNeo4JLoader(unittest.TestCase):
         self.assertEqual(
             {"name": "der Hut", "language": "German"} | HUT_DECLENSION_MAP,
             get_attributes(yaml.safe_load(HUT_YAML)),
+        )
+
+    def test_update_link_hints(self):
+        self.assertEqual(
+            {"Reis": "der Reis", "Reise": "der Reis"},
+            update_link_hints({}, {"declension-1-1": "Reis", "declension-1-2": "Reise"}, "der Reis")
         )
