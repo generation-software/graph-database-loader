@@ -133,7 +133,7 @@ def save_link_hints_relationships(link_hints, vocabulary, driver):
         attributes = get_attributes(word)
 
         for attribute_value in attributes.values():
-            if (term != link_hints[attribute_value]) and (attribute_value in link_hints):
+            if (attribute_value in link_hints) and (term != link_hints[attribute_value]):
                 save_a_link_with_attributes(
                     language=GERMAN,
                     database_driver=driver,
