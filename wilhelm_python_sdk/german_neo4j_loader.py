@@ -137,7 +137,7 @@ def save_link_hints_relationships(link_hints, vocabulary, driver):
                     database_driver=driver,
                     source_name=term,
                     target_name=link_hints[attribute_value],
-                    attributes={"name": "sharing declensions"}
+                    attributes={"name": f"sharing declensions: {link_hints[attribute_value]}"}
                 )
 
 
