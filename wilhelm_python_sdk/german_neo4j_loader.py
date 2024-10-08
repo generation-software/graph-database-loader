@@ -93,7 +93,9 @@ def update_link_hints(link_hints: dict[str, str], attributes: dict[str, str], te
     :param attributes:  The source of mapping hints
     :param term:  the term that has the attribute
     """
-    excluded_values = ["", "nominative", "genitive", "dative", "accusative", "masclune", "feminine", "neuter", "plural"]
+    excluded_values = [
+        "", "nominative", "genitive", "dative", "accusative", "masclune", "feminine", "neuter", "singular", "plural"
+    ]
     for value in attributes.values():
         if value not in excluded_values:
             link_hints[value] = term
