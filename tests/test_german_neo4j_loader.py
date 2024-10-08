@@ -54,7 +54,7 @@ HUT_DECLENSION_MAP = {
 
     "declension-4-0": "accusative",
     "declension-4-1": "Hut",
-    "declension-4-2": "Hüte"
+    "declension-4-2": "Hüte",
 }
 
 
@@ -81,3 +81,6 @@ class TestGermanNeo4JLoader(unittest.TestCase):
         self.assertTrue("genitive" not in actual)
         self.assertTrue("dative" not in actual)
         self.assertTrue("accusative" not in actual)
+
+    def test_NA_is_not_used_for_link_inference(self):
+        self.assertTrue("N/A" not in update_link_hints({}, {"declension-4-1": "N/A"}, "der Hut"))
