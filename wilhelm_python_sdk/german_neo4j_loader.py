@@ -30,6 +30,20 @@ URI = os.environ["NEO4J_URI"]
 DATABASE = os.environ["NEO4J_DATABASE"]
 AUTH = (os.environ["NEO4J_USERNAME"], os.environ["NEO4J_PASSWORD"])
 
+EXCLUDED_DECLENSION_ENTRIES = [
+    "",
+    "singular",
+    "plural",
+    "masculine",
+    "feminine",
+    "neuter",
+    "nominative",
+    "genitive",
+    "dative",
+    "accusative",
+    "N/A"
+]
+
 
 def get_declension_attributes(word: object) -> dict[str, str]:
     """
@@ -93,9 +107,8 @@ def update_link_hints(link_hints: dict[str, str], attributes: dict[str, str], te
     :param attributes:  The source of mapping hints
     :param term:  the term that has the attribute
     """
-    excluded_values = ["", "singular", "plural", "nominative", "genitive", "dative", "accusative", "N/A"]
     for key, value in attributes.items():
-        if key.startswith("declension-") and value not in excluded_values:
+        if key.startswith("declension-") and value not in EXCLUDED_DECLENSION_ENTRIES:
             link_hints[value] = term
     return link_hints
 

@@ -15,6 +15,7 @@ import unittest
 
 import yaml
 
+from wilhelm_python_sdk.german_neo4j_loader import EXCLUDED_DECLENSION_ENTRIES
 from wilhelm_python_sdk.german_neo4j_loader import get_attributes
 from wilhelm_python_sdk.german_neo4j_loader import update_link_hints
 
@@ -72,15 +73,8 @@ class TestGermanNeo4JLoader(unittest.TestCase):
             update_link_hints({}, {"declension-1-1": "Reis", "declension-1-2": "Reise"}, "der Reis")
         )
 
-    def test_table_haders_are_not_used_for_link_inference(self):
-        actual = update_link_hints({}, HUT_DECLENSION_MAP, "der Hut")
-        self.assertTrue("" not in actual)
-        self.assertTrue("singular" not in actual)
-        self.assertTrue("plural" not in actual)
-        self.assertTrue("nominative" not in actual)
-        self.assertTrue("genitive" not in actual)
-        self.assertTrue("dative" not in actual)
-        self.assertTrue("accusative" not in actual)
-
-    def test_NA_is_not_used_for_link_inference(self):
-        self.assertTrue("N/A" not in update_link_hints({}, {"declension-4-1": "N/A"}, "der Hut"))
+    def test_all_declension_tables_values_that_are_not_used_for_link_reference(self):
+        all_cases_declension_map = dict([(f"declension-{value}", value) for value in EXCLUDED_DECLENSION_ENTRIES])
+        actual = update_link_hints({}, all_cases_declension_map, "der Hut")
+        for value in all_cases_declension_map.values():
+            self.assertTrue(value not in actual)
