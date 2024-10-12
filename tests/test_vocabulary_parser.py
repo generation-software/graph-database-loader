@@ -15,9 +15,11 @@ import unittest
 
 import yaml
 
+from wilhelm_python_sdk.vocabulary_parser import EXCLUDED_DECLENSION_ENTRIES
 from wilhelm_python_sdk.vocabulary_parser import GERMAN
 from wilhelm_python_sdk.vocabulary_parser import get_attributes
 from wilhelm_python_sdk.vocabulary_parser import get_definitions
+from wilhelm_python_sdk.vocabulary_parser import update_link_hints
 
 UNKOWN_DECLENSION_NOUN_YAML = """
     term: die Grilltomate
@@ -94,3 +96,15 @@ class TestLoader(unittest.TestCase):
             {"name": "der Hut", "language": "German"} | HUT_DECLENSION_MAP,
             get_attributes(yaml.safe_load(HUT_YAML), GERMAN, "name"),
         )
+
+    def test_update_link_hints(self):
+        self.assertEqual(
+            {"Reis": "der Reis", "Reise": "der Reis"},
+            update_link_hints({}, {"declension-1-1": "Reis", "declension-1-2": "Reise"}, "der Reis")
+        )
+
+    def test_all_declension_tables_values_that_are_not_used_for_link_reference(self):
+        all_cases_declension_map = dict([(f"declension-{value}", value) for value in EXCLUDED_DECLENSION_ENTRIES])
+        actual = update_link_hints({}, all_cases_declension_map, "der Hut")
+        for value in all_cases_declension_map.values():
+            self.assertTrue(value not in actual)
