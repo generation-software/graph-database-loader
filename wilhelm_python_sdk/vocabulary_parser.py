@@ -22,6 +22,20 @@ GERMAN = "German"
 LATIN = "Latin"
 ANCIENT_GREEK = "Ancient Greek"
 
+EXCLUDED_DECLENSION_ENTRIES = [
+    "",
+    "singular",
+    "plural",
+    "masculine",
+    "feminine",
+    "neuter",
+    "nominative",
+    "genitive",
+    "dative",
+    "accusative",
+    "N/A"
+]
+
 
 def get_vocabulary(yaml_path: str) -> list:
     with open(yaml_path, "r") as f:
@@ -129,3 +143,46 @@ def get_attributes(word: object, language: str, node_label_property_key: str) ->
         attributes = attributes | get_declension_attributes(word)
 
     return attributes
+
+
+def get_inferred_links(vocabulary: list[dict], label_key: str) -> list[dict]:
+    link_hints = {}
+    for word in vocabulary:
+        attributes = get_attributes(word, GERMAN, label_key)
+
+        link_hints = update_link_hints(link_hints, attributes, word["term"])
+
+    inferred_links = []
+    for word in vocabulary:
+        term = word["term"]
+        attributes = get_attributes(word, GERMAN, label_key)
+
+        for attribute_value in attributes.values():
+            if (attribute_value in link_hints) and (term != link_hints[attribute_value]):
+                inferred_links.append({
+                    "source_label": term,
+                    "target_label": link_hints[attribute_value],
+                    "attributes": {label_key: f"sharing declensions: {link_hints[attribute_value]}"},
+                })
+
+    return inferred_links
+
+
+def update_link_hints(link_hints: dict[str, str], attributes: dict[str, str], term: str):
+    """
+    Update and prepare a mapping between shared attribute values (key) to the term that has that attribute (value).
+
+    This mapping will be used to create more links in graph database.
+
+    The operation calling this method was inspired by the spotting the relationship between "die Reise" and "der Reis"
+    who share large portions of their declension table. In this case, there will be a link between "die Reise" and
+    "der Reis". Linking the vocabulary this way helps memorize vocabulary more efficiently
+
+    :param link_hints:  The mapping
+    :param attributes:  The source of mapping hints
+    :param term:  the term that has the attribute
+    """
+    for key, value in attributes.items():
+        if key.startswith("declension-") and value not in EXCLUDED_DECLENSION_ENTRIES:
+            link_hints[value] = term
+    return link_hints
