@@ -45,21 +45,30 @@ If we would like to empty database, we can do
 
 Note that this function targets the same database with the same credentials listed above
 
-Wiktionary Parser
+API Documentation
 =================
 
-Ancient Greek Verb Conjugation Parser
--------------------------------------
-
-.. automodule:: wilhelm_python_sdk.ancient_greek_wiktionary_parser
+.. automodule:: wilhelm_python_sdk.german_loader
    :members:
    :undoc-members:
    :show-inheritance:
 
-API Documentation
-=================
+.. automodule:: wilhelm_python_sdk.latin_loader
+   :members:
+   :undoc-members:
+   :show-inheritance:
 
-.. automodule:: wilhelm_python_sdk.german_neo4j_loader
+.. automodule:: wilhelm_python_sdk.ancient_greek_loader
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+.. automodule:: wilhelm_python_sdk.vocabulary_parser
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+.. automodule:: wilhelm_python_sdk.database_clients
    :members:
    :undoc-members:
    :show-inheritance:

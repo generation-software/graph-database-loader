@@ -99,7 +99,9 @@ def get_definitions(word) -> list[(str, str)]:
 
 def get_declension_attributes(word: object) -> dict[str, str]:
     """
-    Returns noun-specific attributes as a flat map.
+    Returns the declension of a word.
+
+    If the word does not have a "declension" field, the function returns an empty dictionary.
 
     If the noun's declension is, for some reasons, "Unknown", this function will return an empty dict. Otherwise, the
     declension table is flattened like with row-col index in the map key::
@@ -115,6 +117,9 @@ def get_declension_attributes(word: object) -> dict[str, str]:
 
     :return: a flat map containing all the YAML encoded information about the noun excluding term and definition
     """
+
+    if "declension" not in word:
+        return {}
 
     declension = word["declension"]
 
@@ -137,20 +142,48 @@ def get_attributes(word: object, language: str, node_label_property_key: str) ->
 
     :return: a flat map containing all the YAML encoded information about the vocabulary
     """
-    attributes = {node_label_property_key: word["term"], "language": language}
-
-    if "declension" in word:
-        attributes = attributes | get_declension_attributes(word)
-
-    return attributes
+    return {node_label_property_key: word["term"], "language": language} | get_declension_attributes(word)
 
 
 def get_inferred_links(vocabulary: list[dict], label_key: str) -> list[dict]:
+    """
+    Return a list of inferred links between related vocabularies.
+
+    This function is the point of extending link inference capabilities. At this point, the link inference includes
+
+    - :py:meth:`declension sharing <wilhelm_python_sdk.vocabulary_parser.get_inferred_declension_links>`
+    - :py:meth:`token sharing <wilhelm_python_sdk.vocabulary_parser.get_inferred_tokenization_links>`
+
+    :param vocabulary:  A wilhelm-vocabulary repo YAML file deserialized
+    :param label_key:  The name of the node attribute that will be used as the label in displaying the node
+
+    :return: a list of link object, each of which has a "source_label", a "target_label", and an "attributes" key
+    """
+    return (get_inferred_declension_links(vocabulary, label_key) +
+            get_inferred_tokenization_links(vocabulary, label_key))
+
+
+def get_inferred_declension_links(vocabulary: list[dict], label_key: str) -> list[dict]:
+    """
+    Return a list of inferred links between related vocabulary terms that share declension table entries
+
+    This mapping will be used to create more links in graph database.
+
+    The operation calling this method was inspired by the spotting the relationship between "die Reise" and "der Reis"
+    who share large portions of their declension table. In this case, there will be a link between "die Reise" and
+    "der Reis". Linking the vocabulary this way helps memorize vocabulary more efficiently
+
+    :param vocabulary:  A wilhelm-vocabulary repo YAML file deserialized
+    :param label_key:  The name of the node attribute that will be used as the label in displaying the node
+
+    :return: a list of link object, each of which has a "source_label", a "target_label", and an "attributes" key
+    """
     link_hints = {}
     for word in vocabulary:
-        attributes = get_attributes(word, GERMAN, label_key)
-
-        link_hints = update_link_hints(link_hints, attributes, word["term"])
+        for key, value in get_declension_attributes(word).items():
+            if value not in EXCLUDED_DECLENSION_ENTRIES:
+                for declension in value.split(","):
+                    link_hints[declension.strip()] = word["term"]
 
     inferred_links = []
     for word in vocabulary:
@@ -162,27 +195,84 @@ def get_inferred_links(vocabulary: list[dict], label_key: str) -> list[dict]:
                 inferred_links.append({
                     "source_label": term,
                     "target_label": link_hints[attribute_value],
-                    "attributes": {label_key: f"sharing declensions: {link_hints[attribute_value]}"},
+                    "attributes": {label_key: "sharing declensions"},
                 })
+                break
 
     return inferred_links
 
 
-def update_link_hints(link_hints: dict[str, str], attributes: dict[str, str], term: str):
+def get_inferred_tokenization_links(vocabulary: list[dict], label_key: str) -> list[dict]:
     """
-    Update and prepare a mapping between shared attribute values (key) to the term that has that attribute (value).
+    Return a list of inferred links between related vocabulary terms which are related to one another.
 
     This mapping will be used to create more links in graph database.
 
-    The operation calling this method was inspired by the spotting the relationship between "die Reise" and "der Reis"
-    who share large portions of their declension table. In this case, there will be a link between "die Reise" and
-    "der Reis". Linking the vocabulary this way helps memorize vocabulary more efficiently
+    This was inspired by the spotting the relationships among::
 
-    :param link_hints:  The mapping
-    :param attributes:  The source of mapping hints
-    :param term:  the term that has the attribute
+        vocabulary:
+          - term: das Jahr
+            definition: the year
+            declension:
+              - ["",         singular,        plural        ]
+              - [nominative, Jahr,            "Jahre, Jahr" ]
+              - [genitive,   "Jahres, Jahrs", "Jahre, Jahr" ]
+              - [dative,     Jahr,            "Jahren, Jahr"]
+              - [accusative, Jahr,            "Jahre, Jahr" ]
+          - term: seit zwei Jahren
+            definition: for two years
+          - term: in den letzten Jahren
+            definition: in recent years
+
+    1. Both 2nd and 3rd are related to the 1st and the two links can be inferred by observing that "Jahren" in 2nd and
+       3rd match the declension table of the 1st
+    2. In addition, the 2nd and 3rd are related because they both have "Jahren".
+
+    Given the 2 observations above, this function tokenizes the "term" and the declension table of each word. If two
+    words share at least 1 token, they are defined to be "related"
+
+    :param vocabulary:  A wilhelm-vocabulary repo YAML file deserialized
+    :param label_key:  The name of the node attribute that will be used as the label in displaying the node
+
+    :return: a list of link object, each of which has a "source_label", a "target_label", and an "attributes" key
     """
-    for key, value in attributes.items():
-        if key.startswith("declension-") and value not in EXCLUDED_DECLENSION_ENTRIES:
-            link_hints[value] = term
-    return link_hints
+    tokenization = {}
+    for word in vocabulary:
+        term = word["term"]
+        tokenization[term] = set()
+
+        # declension tokenization
+        for key, value in get_declension_attributes(word).items():
+            if value not in EXCLUDED_DECLENSION_ENTRIES:
+                for declension in value.split(","):
+                    tokenization[term].add(declension.strip())
+
+        # term tokenization
+        for token in term.split(" "):
+            tokenization[term].add(token.strip())
+
+    inferred_links = []
+    for word in vocabulary:
+        this_term = word["term"]
+
+        for that_term, that_term_tokens in tokenization.items():
+            jump_to_next_term = False
+
+            if this_term == that_term:
+                continue
+
+            for this_token in this_term.split(" "):
+                for that_token in that_term_tokens:
+                    if this_token.lower() == that_token.lower():
+                        inferred_links.append({
+                            "source_label": this_term,
+                            "target_label": that_term,
+                            "attributes": {label_key: "term related"},
+                        })
+                        jump_to_next_term = True
+                        break
+
+                if jump_to_next_term:
+                    break
+
+    return inferred_links
