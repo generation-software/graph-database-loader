@@ -1,4 +1,4 @@
-# Copyright Jiaqi (Hutao of Emberfire)
+# Copyright Jiaqi Liu
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -30,8 +30,12 @@ class Neo4jClient:
         self.driver = GraphDatabase.driver(Neo4jClient.URI, auth=Neo4jClient.AUTH)
         self.database = Neo4jClient.DATABASE
 
-    def close(self):
-        self.driver.close()
+    def __enter__(self):
+        return self
+
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        if self.driver:
+            self.driver.close()
 
     def __node_with_prop_exists(self, node_type: str, prop_key: str, prop_value: str):
         records = self.driver.execute_query(
