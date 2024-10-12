@@ -117,7 +117,7 @@ def save_a_node_with_attributes(node_type: str, attributes: dict):
 
 
 def save_a_link_with_attributes(language: str, source_name: str, target_name: str, attributes: dict):
-    if node_with_label_exists(target_name, "Term", DRIVER):
+    if node_with_label_exists(target_name, "Term"):
         DRIVER.execute_query(
             """
             MATCH
