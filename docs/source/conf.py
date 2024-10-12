@@ -19,8 +19,8 @@ sys.path.insert(0, os.path.abspath('../../'))
 # -- Project information -----------------------------------------------------
 
 project = 'wilhelm-python-sdk'
-copyright = '2024, Jiaqi (Hutao of Emberfire)'
-author = 'Jiaqi (Hutao of Emberfire)'
+copyright = '2024, Jiaqi Liu'
+author = 'Jiaqi Liu'
 
 # The full version, including alpha/beta/rc tags
 release = '0.1.0'

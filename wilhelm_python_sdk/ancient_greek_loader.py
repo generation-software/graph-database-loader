@@ -1,4 +1,4 @@
-# Copyright Jiaqi (Hutao of Emberfire)
+# Copyright Jiaqi Liu
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -26,22 +26,24 @@ def load_into_database(yaml_path: str):
     :param yaml_path:  The absolute or relative path (to the invoking script) to the YAML file above
     """
     vocabulary = get_vocabulary(yaml_path)
-    database_client = get_database_client()
     label_key = get_node_label_attribute_key()
 
-    for word in vocabulary:
-        term = word["term"]
+    with get_database_client() as database_client:
+        for word in vocabulary:
+            term = word["term"]
 
-        database_client.save_a_node_with_attributes("Term", get_attributes(word, ANCIENT_GREEK, label_key))
+            database_client.save_a_node_with_attributes("Term", get_attributes(word, ANCIENT_GREEK, label_key))
 
-        definitions = get_definitions(word)
-        for definition_with_predicate in definitions:
-            predicate = definition_with_predicate[0]
-            definition = definition_with_predicate[1]
+            definitions = get_definitions(word)
+            for definition_with_predicate in definitions:
+                predicate = definition_with_predicate[0]
+                definition = definition_with_predicate[1]
 
-            database_client.save_a_node_with_attributes("Definition", {label_key: definition})
+                database_client.save_a_node_with_attributes("Definition", {label_key: definition})
 
-            if predicate:
-                database_client.save_a_link_with_attributes(ANCIENT_GREEK, term, definition, {label_key: predicate})
-            else:
-                database_client.save_a_link_with_attributes(ANCIENT_GREEK, term, definition, {label_key: "definition"})
+                if predicate:
+                    database_client.save_a_link_with_attributes(ANCIENT_GREEK, term, definition, {label_key: predicate})
+                else:
+                    database_client.save_a_link_with_attributes(
+                        ANCIENT_GREEK, term, definition, {label_key: "definition"}
+                    )
