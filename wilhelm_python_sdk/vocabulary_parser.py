@@ -12,16 +12,11 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 import logging
-import os
 import re
 
 import yaml
 
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
-
-URI = os.environ["NEO4J_URI"]
-DATABASE = os.environ["NEO4J_DATABASE"]
-AUTH = (os.environ["NEO4J_USERNAME"], os.environ["NEO4J_PASSWORD"])
 
 GERMAN = "German"
 LATIN = "Latin"
@@ -88,55 +83,49 @@ def get_definitions(word) -> list[(str, str)]:
     return predicate_with_definition
 
 
-def node_with_label_exists(label: str, node_type: str, driver):
-    records = driver.execute_query(
-        f"MATCH (node:{node_type}) WHERE node.name = $name RETURN node",
-        name=label,
-        database_=DATABASE,
-    ).records
+def get_declension_attributes(word: object) -> dict[str, str]:
+    """
+    Returns noun-specific attributes as a flat map.
 
-    return len(records) > 0
+    If the noun's declension is, for some reasons, "Unknown", this function will return an empty dict. Otherwise, the
+    declension table is flattened like with row-col index in the map key::
+
+    "declension-0-0": "",
+    "declension-0-1": "singular",
+    "declension-0-2": "singular",
+    "declension-0-3": "singular",
+    "declension-0-4": "plural",
+    "declension-0-5": "plural",
+
+    :param word:  A vocabulary represented in YAML dictionary which has a "declension" key
+
+    :return: a flat map containing all the YAML encoded information about the noun excluding term and definition
+    """
+
+    declension = word["declension"]
+
+    if declension == "Unknown":
+        return {}
+
+    attributes = {}
+    for i, row in enumerate(declension):
+        for j, col in enumerate(row):
+            attributes[f"declension-{i}-{j}"] = declension[i][j]
+
+    return attributes
 
 
-def save_a_node_with_attributes(driver, node_type: str, attributes: dict):
-    if node_with_label_exists(attributes["name"], node_type, driver):
-        logging.info(f"node: {attributes} already exists in database")
-        return
+def get_attributes(word: object, language: str, node_label_property_key: str) -> dict[str, str]:
+    """
+    Returns a flat map as the Term node properties stored in Neo4J.
 
-    logging.info(f"Creating node {attributes}...")
-    summary = driver.execute_query(
-        f"CREATE (node:{node_type} $attributes) RETURN node",
-        attributes=attributes,
-        database_=DATABASE,
-    ).summary
+    :param word:  A German vocabulary representing
 
+    :return: a flat map containing all the YAML encoded information about the vocabulary
+    """
+    attributes = {node_label_property_key: word["term"], "language": language}
 
-def save_a_link_with_attributes(language: str, database_driver, source_name: str, target_name: str, attributes: dict):
-    if node_with_label_exists(target_name, "Term", database_driver):
-        database_driver.execute_query(
-            """
-            MATCH
-                (term:Term WHERE term.name = $term AND term.language = $language),
-                (related:Term WHERE related.name = $related_term AND term.language = $language)
-            CREATE
-                (term)-[:RELATED $attributes]->(related)
-            """,
-            term=source_name,
-            language=language,
-            related_term=target_name,
-            attributes=attributes
-        )
-    else:
-        database_driver.execute_query(
-            """
-            MATCH
-                (term:Term WHERE term.name = $term AND term.language = $language),
-                (definition:Definition WHERE definition.name = $definition)
-            CREATE
-                (term)-[:DEFINITION $attributes]->(definition)
-            """,
-            term=source_name,
-            language=language,
-            definition=target_name,
-            attributes=attributes
-        )
+    if "declension" in word:
+        attributes = attributes | get_declension_attributes(word)
+
+    return attributes
