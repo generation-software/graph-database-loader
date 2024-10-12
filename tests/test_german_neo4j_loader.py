@@ -13,59 +13,11 @@
 # limitations under the License.
 import unittest
 
-import yaml
-
-from wilhelm_python_sdk.german_neo4j_loader import EXCLUDED_DECLENSION_ENTRIES
-from wilhelm_python_sdk.german_neo4j_loader import get_attributes
-from wilhelm_python_sdk.german_neo4j_loader import update_link_hints
-
-UNKOWN_DECLENSION_NOUN_YAML = """
-    term: die Grilltomate
-    definition: the grilled tomato
-    declension: Unknown
-"""
-
-HUT_YAML = """
-    term: der Hut
-    definition: the hat
-    declension:
-      - ["",         singular,      plural]
-      - [nominative, Hut,           Hüte  ]
-      - [genitive,   "Hutes, Huts", Hüte  ]
-      - [dative,     Hut,           Hüten ]
-      - [accusative, Hut,           Hüte  ]
-"""
-
-HUT_DECLENSION_MAP = {
-    "declension-0-0": "",
-    "declension-0-1": "singular",
-    "declension-0-2": "plural",
-
-    "declension-1-0": "nominative",
-    "declension-1-1": "Hut",
-    "declension-1-2": "Hüte",
-
-    "declension-2-0": "genitive",
-    "declension-2-1": "Hutes, Huts",
-    "declension-2-2": "Hüte",
-
-    "declension-3-0": "dative",
-    "declension-3-1": "Hut",
-    "declension-3-2": "Hüten",
-
-    "declension-4-0": "accusative",
-    "declension-4-1": "Hut",
-    "declension-4-2": "Hüte",
-}
+from wilhelm_python_sdk.german_loader import EXCLUDED_DECLENSION_ENTRIES
+from wilhelm_python_sdk.german_loader import update_link_hints
 
 
 class TestGermanNeo4JLoader(unittest.TestCase):
-
-    def test_get_attributes(self):
-        self.assertEqual(
-            {"name": "der Hut", "language": "German"} | HUT_DECLENSION_MAP,
-            get_attributes(yaml.safe_load(HUT_YAML)),
-        )
 
     def test_update_link_hints(self):
         self.assertEqual(
