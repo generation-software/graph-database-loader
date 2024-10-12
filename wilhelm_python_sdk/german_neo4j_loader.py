@@ -11,11 +11,6 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-import logging
-import os
-
-from neo4j import GraphDatabase
-
 from wilhelm_python_sdk.vocabulary_database_loader import GERMAN
 from wilhelm_python_sdk.vocabulary_database_loader import get_definitions
 from wilhelm_python_sdk.vocabulary_database_loader import get_vocabulary
@@ -23,12 +18,6 @@ from wilhelm_python_sdk.vocabulary_database_loader import \
     save_a_link_with_attributes
 from wilhelm_python_sdk.vocabulary_database_loader import \
     save_a_node_with_attributes
-
-logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
-
-URI = os.environ["NEO4J_URI"]
-DATABASE = os.environ["NEO4J_DATABASE"]
-AUTH = (os.environ["NEO4J_USERNAME"], os.environ["NEO4J_PASSWORD"])
 
 EXCLUDED_DECLENSION_ENTRIES = [
     "",
@@ -63,7 +52,6 @@ def get_declension_attributes(word: object) -> dict[str, str]:
 
     :return: a flat map containing all the YAML encoded information about the noun excluding term and definition
     """
-
     declension = word["declension"]
 
     if declension == "Unknown":
@@ -113,7 +101,7 @@ def update_link_hints(link_hints: dict[str, str], attributes: dict[str, str], te
     return link_hints
 
 
-def save_relationships_between_term_and_definitions(vocabulary, driver):
+def save_relationships_between_term_and_definitions(vocabulary):
     for word in vocabulary:
         definitions = get_definitions(word)
         for definition_with_predicate in definitions:
@@ -123,7 +111,6 @@ def save_relationships_between_term_and_definitions(vocabulary, driver):
             if predicate:
                 save_a_link_with_attributes(
                     language=GERMAN,
-                    database_driver=driver,
                     source_name=term,
                     target_name=definition,
                     attributes={"name": predicate}
@@ -131,14 +118,13 @@ def save_relationships_between_term_and_definitions(vocabulary, driver):
             else:
                 save_a_link_with_attributes(
                     language=GERMAN,
-                    database_driver=driver,
                     source_name=term,
                     target_name=definition,
                     attributes={"name": "definition"}
                 )
 
 
-def save_link_hints_relationships(link_hints, vocabulary, driver):
+def save_link_hints_relationships(link_hints, vocabulary):
     for word in vocabulary:
         term = word["term"]
         attributes = get_attributes(word)
@@ -147,7 +133,6 @@ def save_link_hints_relationships(link_hints, vocabulary, driver):
             if (attribute_value in link_hints) and (term != link_hints[attribute_value]):
                 save_a_link_with_attributes(
                     language=GERMAN,
-                    database_driver=driver,
                     source_name=term,
                     target_name=link_hints[attribute_value],
                     attributes={"name": f"sharing declensions: {link_hints[attribute_value]}"}
@@ -160,9 +145,6 @@ def load_into_database(yaml_path: str):
 
     :param yaml_path:  The absolute or relative path (to the invoking script) to the YAML file above
     """
-    with GraphDatabase.driver(URI, auth=AUTH) as driver:
-        driver.verify_connectivity()
-
     vocabulary = get_vocabulary(yaml_path)
     link_hints = {}
 
@@ -171,11 +153,11 @@ def load_into_database(yaml_path: str):
 
         link_hints = update_link_hints(link_hints, attributes, word["term"])
 
-        save_a_node_with_attributes(driver, "Term", attributes)
+        save_a_node_with_attributes("Term", attributes)
         definitions = get_definitions(word)
         for definition_with_predicate in definitions:
             definition = definition_with_predicate[1]
-            save_a_node_with_attributes(driver, "Definition", {"name": definition})
+            save_a_node_with_attributes("Definition", {"name": definition})
 
-    save_relationships_between_term_and_definitions(vocabulary, driver)
-    save_link_hints_relationships(link_hints, vocabulary, driver)
+    save_relationships_between_term_and_definitions(vocabulary)
+    save_link_hints_relationships(link_hints, vocabulary)

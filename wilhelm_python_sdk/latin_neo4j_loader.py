@@ -11,11 +11,6 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-import logging
-import os
-
-from neo4j import GraphDatabase
-
 from wilhelm_python_sdk.vocabulary_database_loader import LATIN
 from wilhelm_python_sdk.vocabulary_database_loader import get_definitions
 from wilhelm_python_sdk.vocabulary_database_loader import get_vocabulary
@@ -23,12 +18,6 @@ from wilhelm_python_sdk.vocabulary_database_loader import \
     save_a_link_with_attributes
 from wilhelm_python_sdk.vocabulary_database_loader import \
     save_a_node_with_attributes
-
-logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
-
-URI = os.environ["NEO4J_URI"]
-DATABASE = os.environ["NEO4J_DATABASE"]
-AUTH = (os.environ["NEO4J_USERNAME"], os.environ["NEO4J_PASSWORD"])
 
 
 def get_attributes(word: object) -> dict:
@@ -43,24 +32,21 @@ def load_into_database(yaml_path: str):
 
     :param yaml_path:  The absolute or relative path (to the invoking script) to the YAML file above
     """
-    with GraphDatabase.driver(URI, auth=AUTH) as driver:
-        driver.verify_connectivity()
-
     vocabulary = get_vocabulary(yaml_path)
 
     for word in vocabulary:
         term = word["term"]
 
-        save_a_node_with_attributes(driver, "Term", get_attributes(word))
+        save_a_node_with_attributes("Term", get_attributes(word))
 
         definitions = get_definitions(word)
         for definition_with_predicate in definitions:
             predicate = definition_with_predicate[0]
             definition = definition_with_predicate[1]
 
-            save_a_node_with_attributes(driver, "Definition", {"name": definition})
+            save_a_node_with_attributes("Definition", {"name": definition})
 
             if predicate:
-                save_a_link_with_attributes(LATIN, driver, term, definition, {"name": predicate})
+                save_a_link_with_attributes(LATIN, term, definition, {"name": predicate})
             else:
-                save_a_link_with_attributes(LATIN, driver, term, definition, {"name": "definition"})
+                save_a_link_with_attributes(LATIN, term, definition, {"name": "definition"})

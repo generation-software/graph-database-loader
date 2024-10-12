@@ -16,16 +16,21 @@ import os
 import re
 
 import yaml
+from neo4j import GraphDatabase
 
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 
-URI = os.environ["NEO4J_URI"]
 DATABASE = os.environ["NEO4J_DATABASE"]
-AUTH = (os.environ["NEO4J_USERNAME"], os.environ["NEO4J_PASSWORD"])
 
 GERMAN = "German"
 LATIN = "Latin"
 ANCIENT_GREEK = "Ancient Greek"
+
+DRIVER = None
+with GraphDatabase.driver(
+        os.environ["NEO4J_URI"], auth=(os.environ["NEO4J_USERNAME"], os.environ["NEO4J_PASSWORD"])
+) as driver:
+    DRIVER = driver
 
 
 def get_vocabulary(yaml_path: str) -> list:
@@ -88,8 +93,8 @@ def get_definitions(word) -> list[(str, str)]:
     return predicate_with_definition
 
 
-def node_with_label_exists(label: str, node_type: str, driver):
-    records = driver.execute_query(
+def node_with_label_exists(label: str, node_type: str):
+    records = DRIVER.execute_query(
         f"MATCH (node:{node_type}) WHERE node.name = $name RETURN node",
         name=label,
         database_=DATABASE,
@@ -98,22 +103,22 @@ def node_with_label_exists(label: str, node_type: str, driver):
     return len(records) > 0
 
 
-def save_a_node_with_attributes(driver, node_type: str, attributes: dict):
-    if node_with_label_exists(attributes["name"], node_type, driver):
+def save_a_node_with_attributes(node_type: str, attributes: dict):
+    if node_with_label_exists(attributes["name"], node_type):
         logging.info(f"node: {attributes} already exists in database")
         return
 
     logging.info(f"Creating node {attributes}...")
-    summary = driver.execute_query(
+    return DRIVER.execute_query(
         f"CREATE (node:{node_type} $attributes) RETURN node",
         attributes=attributes,
         database_=DATABASE,
     ).summary
 
 
-def save_a_link_with_attributes(language: str, database_driver, source_name: str, target_name: str, attributes: dict):
-    if node_with_label_exists(target_name, "Term", database_driver):
-        database_driver.execute_query(
+def save_a_link_with_attributes(language: str, source_name: str, target_name: str, attributes: dict):
+    if node_with_label_exists(target_name, "Term", DRIVER):
+        DRIVER.execute_query(
             """
             MATCH
                 (term:Term WHERE term.name = $term AND term.language = $language),
@@ -127,7 +132,7 @@ def save_a_link_with_attributes(language: str, database_driver, source_name: str
             attributes=attributes
         )
     else:
-        database_driver.execute_query(
+        DRIVER.execute_query(
             """
             MATCH
                 (term:Term WHERE term.name = $term AND term.language = $language),
