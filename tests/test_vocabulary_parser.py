@@ -15,11 +15,12 @@ import unittest
 
 import yaml
 
-from wilhelm_python_sdk.vocabulary_parser import EXCLUDED_DECLENSION_ENTRIES
 from wilhelm_python_sdk.vocabulary_parser import GERMAN
 from wilhelm_python_sdk.vocabulary_parser import get_attributes
 from wilhelm_python_sdk.vocabulary_parser import get_definitions
-from wilhelm_python_sdk.vocabulary_parser import update_link_hints
+from wilhelm_python_sdk.vocabulary_parser import get_inferred_declension_links
+from wilhelm_python_sdk.vocabulary_parser import \
+    get_inferred_tokenization_links
 
 UNKOWN_DECLENSION_NOUN_YAML = """
     term: die Grilltomate
@@ -97,14 +98,84 @@ class TestLoader(unittest.TestCase):
             get_attributes(yaml.safe_load(HUT_YAML), GERMAN, "name"),
         )
 
-    def test_update_link_hints(self):
+    def test_get_inferred_declension_links(self):
+        DER_REIS = """
+            term: der Reis
+            definition: the rice
+            declension:
+              - ["",         singular, plural]
+              - [nominative, Reis,     Reise ]
+              - [genitive,   Reises,   Reise ]
+              - [dative,     Reis,     Reisen]
+              - [accusative, Reis,     Reise ]
+        """
+        DIE_REISE = """
+            term: die Reise
+            definition: the travel
+            declension:
+              - ["",         singular, plural]
+              - [nominative, Reise,    Reisen]
+              - [genitive,   Reise,    Reisen]
+              - [dative,     Reise,    Reisen]
+              - [accusative, Reise,    Reisen]
+        """
+
+        vocabulary = [yaml.safe_load(DER_REIS), yaml.safe_load(DIE_REISE)]
+        label_key = "name"
+
         self.assertEqual(
-            {"Reis": "der Reis", "Reise": "der Reis"},
-            update_link_hints({}, {"declension-1-1": "Reis", "declension-1-2": "Reise"}, "der Reis")
+            [
+                {
+                    "source_label": "der Reis",
+                    "target_label": "die Reise",
+                    "attributes": {label_key: "sharing declensions"}
+                }
+            ],
+            get_inferred_declension_links(vocabulary, label_key)
         )
 
-    def test_all_declension_tables_values_that_are_not_used_for_link_reference(self):
-        all_cases_declension_map = dict([(f"declension-{value}", value) for value in EXCLUDED_DECLENSION_ENTRIES])
-        actual = update_link_hints({}, all_cases_declension_map, "der Hut")
-        for value in all_cases_declension_map.values():
-            self.assertTrue(value not in actual)
+    def test_get_inferred_tokenization_links(self):
+        vocabulary = yaml.safe_load("""
+            vocabulary:
+              - term: das Jahr
+                definition: the year
+                declension:
+                  - ["",         singular,        plural        ]
+                  - [nominative, Jahr,            "Jahre, Jahr" ]
+                  - [genitive,   "Jahres, Jahrs", "Jahre, Jahr" ]
+                  - [dative,     Jahr,            "Jahren, Jahr"]
+                  - [accusative, Jahr,            "Jahre, Jahr" ]
+              - term: seit zwei Jahren
+                definition: for two years
+              - term: letzte
+                definition: (adj.) last
+              - term: in den letzten Jahren
+                definition: in recent years
+        """)["vocabulary"]
+        label_key = "name"
+
+        self.assertEqual(
+            [
+                {
+                    'attributes': {'name': 'term related'},
+                    'source_label': 'seit zwei Jahren',
+                    'target_label': 'das Jahr'
+                },
+                {
+                    'attributes': {'name': 'term related'},
+                    'source_label': 'seit zwei Jahren',
+                    'target_label': 'in den letzten Jahren'
+                },
+                {
+                    'attributes': {'name': 'term related'},
+                    'source_label': 'in den letzten Jahren',
+                    'target_label': 'das Jahr'
+                },
+                {
+                    'attributes': {'name': 'term related'},
+                    'source_label': 'in den letzten Jahren',
+                    'target_label': 'seit zwei Jahren'
+                }
+            ],
+            get_inferred_tokenization_links(vocabulary, label_key)
+        )
