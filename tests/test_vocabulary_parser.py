@@ -19,6 +19,7 @@ from wilhelm_python_sdk.vocabulary_parser import GERMAN
 from wilhelm_python_sdk.vocabulary_parser import get_attributes
 from wilhelm_python_sdk.vocabulary_parser import get_definitions
 from wilhelm_python_sdk.vocabulary_parser import get_inferred_declension_links
+from wilhelm_python_sdk.vocabulary_parser import get_inferred_links
 from wilhelm_python_sdk.vocabulary_parser import \
     get_inferred_tokenization_links
 
@@ -96,6 +97,33 @@ class TestLoader(unittest.TestCase):
         self.assertEqual(
             {"name": "der Hut", "language": "German"} | HUT_DECLENSION_MAP,
             get_attributes(yaml.safe_load(HUT_YAML), GERMAN, "name"),
+        )
+
+    def test_get_inferred_links_on_unrelated_terms(self):
+        vocabulary = yaml.safe_load("""
+            vocabulary:
+              - term: der Beruf
+                definition: job
+                declension:
+                  - ["",         singular,          plural ]
+                  - [nominative, Beruf,             Berufe ]
+                  - [genitive,   "Berufes, Berufs", Berufe ]
+                  - [dative,     Beruf,             Berufen]
+                  - [accusative, Beruf,             Berufe ]
+              - term: der Qualitätswein
+                definition: The vintage wine
+                declension:
+                  - ["",         singular,                          plural         ]
+                  - [nominative, Qualitätswein,                     Qualitätsweine ]
+                  - [genitive,   "Qualitätsweines, Qualitätsweins", Qualitätsweine ]
+                  - [dative,     Qualitätswein,                     Qualitätsweinen]
+                  - [accusative, Qualitätswein,                     Qualitätsweine ]
+        """)["vocabulary"]
+        label_key = "name"
+
+        self.assertEqual(
+            [],
+            get_inferred_links(vocabulary, label_key)
         )
 
     def test_get_inferred_declension_links(self):
