@@ -35,6 +35,7 @@ EXCLUDED_DECLENSION_ENTRIES = [
     "accusative",
     "N/A"
 ]
+EXCLUDED_TOKENS = ["der", "die", "das"]
 
 
 def get_vocabulary(yaml_path: str) -> list:
@@ -245,11 +246,14 @@ def get_inferred_tokenization_links(vocabulary: list[dict], label_key: str) -> l
         for key, value in get_declension_attributes(word).items():
             if value not in EXCLUDED_DECLENSION_ENTRIES:
                 for declension in value.split(","):
-                    tokenization[term].add(declension.strip())
+                    cleansed = declension.lower().strip()
+                    tokenization[term].add(cleansed)
 
         # term tokenization
         for token in term.split(" "):
-            tokenization[term].add(token.strip())
+            cleansed = token.lower().strip()
+            if cleansed not in EXCLUDED_TOKENS:
+                tokenization[term].add(cleansed)
 
     inferred_links = []
     for word in vocabulary:
@@ -263,7 +267,7 @@ def get_inferred_tokenization_links(vocabulary: list[dict], label_key: str) -> l
 
             for this_token in this_term.split(" "):
                 for that_token in that_term_tokens:
-                    if this_token.lower() == that_token.lower():
+                    if this_token.lower().strip() == that_token:
                         inferred_links.append({
                             "source_label": this_term,
                             "target_label": that_term,
