@@ -37,30 +37,14 @@ class Neo4jClient:
         if self.driver:
             self.driver.close()
 
-    def __node_with_prop_exists(self, node_type: str, prop_key: str, prop_value: str):
-        records = self.driver.execute_query(
-            f"MATCH (node:{node_type}) WHERE node.{prop_key} = $value RETURN node",
-            value=prop_value,
-            database_=Neo4jClient.DATABASE,
-        ).records
-
-        return len(records) > 0
-
     def save_a_node_with_attributes(self, node_type: str, attributes: dict):
-        if self.__node_with_prop_exists(
-                node_type,
-                Neo4jClient.NODE_LABEL_PROP_KEY,
-                attributes[Neo4jClient.NODE_LABEL_PROP_KEY]
-        ):
-            logging.info(f"node: {attributes} already exists in database")
-            return
-
-        logging.info(f"Creating node {attributes}...")
-        return self.driver.execute_query(
-            f"CREATE (node:{node_type} $attributes) RETURN node",
-            attributes=attributes,
-            database_=Neo4jClient.DATABASE,
-        ).summary
+        # MERGE does not support parameterized query. So we concat query attributes
+        for key, value in attributes.items():
+            attributes[key] = value.replace('"', '\\"')
+        query_attributes = "{" + ", ".join([f"`{key}`: \"{value}\"" for key, value in attributes.items()]) + "}"
+        query = f"""MERGE (node:{node_type} {query_attributes}) RETURN node"""
+        logging.info(f"Creating node: {query}")
+        self.driver.execute_query(query, database_=Neo4jClient.DATABASE)
 
     def save_a_link_with_attributes(self, language: str, source_label: str, target_label: str, attributes: dict):
         if self.__node_with_prop_exists("Term", Neo4jClient.NODE_LABEL_PROP_KEY, target_label):
@@ -92,6 +76,15 @@ class Neo4jClient:
                 definition=target_label,
                 attributes=attributes
             )
+
+    def __node_with_prop_exists(self, node_type: str, prop_key: str, prop_value: str):
+        records = self.driver.execute_query(
+            f"MATCH (node:{node_type}) WHERE node.{prop_key} = $value RETURN node",
+            value=prop_value,
+            database_=Neo4jClient.DATABASE,
+        ).records
+
+        return len(records) > 0
 
 
 def get_database_client():
