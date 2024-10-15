@@ -101,12 +101,12 @@ jobs:
             yaml-file: german.yaml
           },
           {
-            name: Ancient Greek,
+            name: Latin,
             loader: latin_loader,
             yaml-file: latin.yaml
           },
           {
-            name: Latin,
+            name: Ancient Greek,
             loader: ancient_greek_loader,
             yaml-file: ancient-greek.yaml
           }
@@ -121,12 +121,12 @@ jobs:
           python-version: "3.10"
       - name: Startup a Neo4J database
         run: docker run --publish=7474:7474 --publish=7687:7687 --env=NEO4J_AUTH=none neo4j &
+      - name: Install wilhelm-python-sdk locally
+        run: pip3 install -e .
       - name: Wait for database to be ready
         uses: iFaxity/wait-on-action@v1
         with:
           resource: http://localhost:7474
-      - name: Install wilhelm-python-sdk locally
-        run: pip3 install -e .
       - name: Test loading ${{ matrix.language.name }}
         run: |
           git clone https://github.com/QubitPi/wilhelm-vocabulary.git
