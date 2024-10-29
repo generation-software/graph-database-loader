@@ -55,7 +55,7 @@ class Neo4jClient:
                     (related:Term WHERE related.{Neo4jClient.NODE_LABEL_PROP_KEY} = $related_term AND
                     term.language = $language)
                 CREATE
-                    (term)-[:RELATED $attributes]->(related)
+                    (term)-[:LINK $attributes]->(related)
                 """,
                 language=language,
                 term=source_label,
@@ -69,7 +69,7 @@ class Neo4jClient:
                     (term:Term WHERE term.{Neo4jClient.NODE_LABEL_PROP_KEY} = $term AND term.language = $language),
                     (definition:Definition WHERE definition.{Neo4jClient.NODE_LABEL_PROP_KEY} = $definition)
                 CREATE
-                    (term)-[:DEFINITION $attributes]->(definition)
+                    (term)-[:LINK $attributes]->(definition)
                 """,
                 language=language,
                 term=source_label,
