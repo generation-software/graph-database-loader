@@ -17,11 +17,13 @@ import yaml
 
 from wilhelm_python_sdk.vocabulary_parser import GERMAN
 from wilhelm_python_sdk.vocabulary_parser import get_attributes
+from wilhelm_python_sdk.vocabulary_parser import get_declension_tokens
+from wilhelm_python_sdk.vocabulary_parser import get_definition_tokens
 from wilhelm_python_sdk.vocabulary_parser import get_definitions
-from wilhelm_python_sdk.vocabulary_parser import get_inferred_declension_links
 from wilhelm_python_sdk.vocabulary_parser import get_inferred_links
 from wilhelm_python_sdk.vocabulary_parser import \
     get_inferred_tokenization_links
+from wilhelm_python_sdk.vocabulary_parser import get_term_tokens
 
 UNKOWN_DECLENSION_NOUN_YAML = """
     term: die Grilltomate
@@ -126,40 +128,78 @@ class TestLoader(unittest.TestCase):
             get_inferred_links(vocabulary, label_key)
         )
 
-    def test_get_inferred_declension_links(self):
-        DER_REIS = """
-            term: der Reis
-            definition: the rice
-            declension:
-              - ["",         singular, plural]
-              - [nominative, Reis,     Reise ]
-              - [genitive,   Reises,   Reise ]
-              - [dative,     Reis,     Reisen]
-              - [accusative, Reis,     Reise ]
-        """
-        DIE_REISE = """
-            term: die Reise
-            definition: the travel
-            declension:
-              - ["",         singular, plural]
-              - [nominative, Reise,    Reisen]
-              - [genitive,   Reise,    Reisen]
-              - [dative,     Reise,    Reisen]
-              - [accusative, Reise,    Reisen]
-        """
+    def test_get_definition_tokens(self):
+        vocabulary = yaml.safe_load("""
+                    vocabulary:
+                      - term: morgens
+                        definition:
+                          - (adv.) in the morning
+                          - (adv.) a.m.
+                """)["vocabulary"]
+        self.assertEqual(
+            {"morning", "a.m."},
+            get_definition_tokens(vocabulary[0])
+        )
 
-        vocabulary = [yaml.safe_load(DER_REIS), yaml.safe_load(DIE_REISE)]
+    def test_get_term_tokens(self):
+        vocabulary = yaml.safe_load("""
+                    vocabulary:
+                      - term: Viertel vor sieben
+                        definition: (clock time) a quarter before eight
+                """)["vocabulary"]
+        self.assertEqual(
+            {"sieben", "vor", "viertel"},
+            get_term_tokens(vocabulary[0])
+        )
+
+    def test_get_declension_tokens(self):
+        vocabulary = yaml.safe_load("""
+                    vocabulary:
+                      - term: das Jahr
+                        definition: the year
+                        declension:
+                          - ["",         singular,        plural        ]
+                          - [nominative, Jahr,            "Jahre, Jahr" ]
+                          - [genitive,   "Jahres, Jahrs", "Jahre, Jahr" ]
+                          - [dative,     Jahr,            "Jahren, Jahr"]
+                          - [accusative, Jahr,            "Jahre, Jahr" ]
+                """)["vocabulary"]
+        self.assertEqual(
+            {"jahres", "jahre", "jahr", "jahren", "jahrs"},
+            get_declension_tokens(vocabulary[0])
+        )
+
+    def test_two_words_shring_somoe_same_declension_table_entries(self):
+        vocabulary = yaml.safe_load("""
+            vocabulary:
+              - term: die Reise
+                definition: the travel
+                declension:
+                  - ["",         singular, plural]
+                  - [nominative, Reise,    Reisen]
+                  - [genitive,   Reise,    Reisen]
+                  - [dative,     Reise,    Reisen]
+                  - [accusative, Reise,    Reisen]
+              - term: der Reis
+                definition: the rice
+                declension:
+                  - ["",         singular, plural]
+                  - [nominative, Reis,     Reise ]
+                  - [genitive,   Reises,   Reise ]
+                  - [dative,     Reis,     Reisen]
+                  - [accusative, Reis,     Reise ]
+        """)["vocabulary"]
         label_key = "name"
 
         self.assertEqual(
             [
                 {
-                    "source_label": "der Reis",
-                    "target_label": "die Reise",
-                    "attributes": {label_key: "sharing declensions"}
+                    'attributes': {'name': 'term related'},
+                    'source_label': 'die Reise',
+                    'target_label': 'der Reis'
                 }
             ],
-            get_inferred_declension_links(vocabulary, label_key)
+            get_inferred_tokenization_links(vocabulary, label_key)
         )
 
     def test_get_inferred_tokenization_links(self):
