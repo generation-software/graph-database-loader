@@ -35,7 +35,15 @@ EXCLUDED_DECLENSION_ENTRIES = [
     "accusative",
     "N/A"
 ]
-EXCLUDED_TOKENS = ["der", "die", "das"]
+EXCLUDED_TOKENS = {"der", "die", "das", "the"}
+
+ENGLISH_PROPOSITIONS = {
+    "about", "above", "across", "after", "against", "along", "among", "around", "at", "before", "behind", "below",
+    "beneath", "beside", "between", "beyond", "by", "down", "during", "except", "for", "from", "in", "inside", "into",
+    "like", "near", "of", "off", "on", "onto", "out", "outside", "over", "past", "since", "through", "throughout", "to",
+    "toward", "under", "underneath", "until", "up", "upon", "with", "within", "without"
+}
+EXCLUDED_DEFINITION_TOKENS = {"the"} | ENGLISH_PROPOSITIONS
 
 
 def get_vocabulary(yaml_path: str) -> list:
@@ -152,7 +160,6 @@ def get_inferred_links(vocabulary: list[dict], label_key: str) -> list[dict]:
 
     This function is the point of extending link inference capabilities. At this point, the link inference includes
 
-    - :py:meth:`declension sharing <wilhelm_python_sdk.vocabulary_parser.get_inferred_declension_links>`
     - :py:meth:`token sharing <wilhelm_python_sdk.vocabulary_parser.get_inferred_tokenization_links>`
 
     :param vocabulary:  A wilhelm-vocabulary repo YAML file deserialized
@@ -160,47 +167,47 @@ def get_inferred_links(vocabulary: list[dict], label_key: str) -> list[dict]:
 
     :return: a list of link object, each of which has a "source_label", a "target_label", and an "attributes" key
     """
-    return (get_inferred_declension_links(vocabulary, label_key) +
-            get_inferred_tokenization_links(vocabulary, label_key))
+    return get_inferred_tokenization_links(vocabulary, label_key)
 
 
-def get_inferred_declension_links(vocabulary: list[dict], label_key: str) -> list[dict]:
-    """
-    Return a list of inferred links between related vocabulary terms that share declension table entries
+def get_definition_tokens(word: dict) -> set[str]:
+    definitions = [pair[1] for pair in get_definitions(word)]
+    tokens = set()
 
-    This mapping will be used to create more links in graph database.
+    for token in set(sum([definition.split(" ") for definition in set().union(set(definitions))], [])):
+        cleansed = token.lower().strip()
+        if cleansed not in EXCLUDED_DEFINITION_TOKENS:
+            tokens.add(cleansed)
 
-    The operation calling this method was inspired by the spotting the relationship between "die Reise" and "der Reis"
-    who share large portions of their declension table. In this case, there will be a link between "die Reise" and
-    "der Reis". Linking the vocabulary this way helps memorize vocabulary more efficiently
+    return tokens
 
-    :param vocabulary:  A wilhelm-vocabulary repo YAML file deserialized
-    :param label_key:  The name of the node attribute that will be used as the label in displaying the node
 
-    :return: a list of link object, each of which has a "source_label", a "target_label", and an "attributes" key
-    """
-    link_hints = {}
-    for word in vocabulary:
-        for key, value in get_declension_attributes(word).items():
-            if value not in EXCLUDED_DECLENSION_ENTRIES:
-                for declension in value.split(","):
-                    link_hints[declension.strip()] = word["term"]
+def get_term_tokens(word: dict) -> set[str]:
+    term = word["term"]
+    tokens = set()
 
-    inferred_links = []
-    for word in vocabulary:
-        term = word["term"]
-        attributes = get_attributes(word, GERMAN, label_key)
+    for token in term.split(" "):
+        cleansed = token.lower().strip()
+        if cleansed not in EXCLUDED_TOKENS:
+            tokens.add(cleansed)
 
-        for attribute_value in attributes.values():
-            if (attribute_value in link_hints) and (term != link_hints[attribute_value]):
-                inferred_links.append({
-                    "source_label": term,
-                    "target_label": link_hints[attribute_value],
-                    "attributes": {label_key: "sharing declensions"},
-                })
-                break
+    return tokens
 
-    return inferred_links
+
+def get_declension_tokens(word: dict) -> set[str]:
+    tokens = set()
+
+    for key, value in get_declension_attributes(word).items():
+        if value not in EXCLUDED_DECLENSION_ENTRIES:
+            for declension in value.split(","):
+                cleansed = declension.lower().strip()
+                tokens.add(cleansed)
+
+    return tokens
+
+
+def get_tokens_of(word: dict) -> set[str]:
+    return get_declension_tokens(word) | get_term_tokens(word) | get_definition_tokens(word)
 
 
 def get_inferred_tokenization_links(vocabulary: list[dict], label_key: str) -> list[dict]:
@@ -237,24 +244,7 @@ def get_inferred_tokenization_links(vocabulary: list[dict], label_key: str) -> l
 
     :return: a list of link object, each of which has a "source_label", a "target_label", and an "attributes" key
     """
-    tokenization = {}
-    for word in vocabulary:
-        term = word["term"]
-        tokenization[term] = set()
-
-        # declension tokenization
-        for key, value in get_declension_attributes(word).items():
-            if value not in EXCLUDED_DECLENSION_ENTRIES:
-                for declension in value.split(","):
-                    cleansed = declension.lower().strip()
-                    tokenization[term].add(cleansed)
-
-        # term tokenization
-        for token in term.split(" "):
-            cleansed = token.lower().strip()
-            if cleansed not in EXCLUDED_TOKENS:
-                tokenization[term].add(cleansed)
-
+    tokenization = dict([word["term"], get_tokens_of(word)] for word in vocabulary)
     inferred_links = []
     for word in vocabulary:
         this_term = word["term"]
