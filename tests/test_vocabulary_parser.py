@@ -23,6 +23,7 @@ from wilhelm_python_sdk.vocabulary_parser import get_definitions
 from wilhelm_python_sdk.vocabulary_parser import get_inferred_links
 from wilhelm_python_sdk.vocabulary_parser import \
     get_inferred_tokenization_links
+from wilhelm_python_sdk.vocabulary_parser import get_levenshtein_links
 from wilhelm_python_sdk.vocabulary_parser import get_term_tokens
 
 UNKOWN_DECLENSION_NOUN_YAML = """
@@ -246,4 +247,34 @@ class TestLoader(unittest.TestCase):
                 }
             ],
             get_inferred_tokenization_links(vocabulary, label_key)
+        )
+
+    def test_get_levenshtein_links(self):
+        vocabulary = yaml.safe_load("""
+            vocabulary:
+              - term: anschließen
+                definition: to connect
+              - term: anschließend
+                definition:
+                  - (adj.) following
+                  - (adv.) afterwards
+              - term: nachher
+                definition: (adv.) afterwards
+        """)["vocabulary"]
+        label_key = "name"
+
+        self.assertEqual(
+            [
+                {
+                    'attributes': {'name': 'structurally similar'},
+                    'source_label': 'anschließen',
+                    'target_label': 'anschließend'
+                },
+                {
+                    'attributes': {'name': 'structurally similar'},
+                    'source_label': 'anschließend',
+                    'target_label': 'anschließen'
+                }
+            ],
+            get_levenshtein_links(vocabulary, label_key)
         )
