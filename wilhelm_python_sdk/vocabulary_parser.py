@@ -14,6 +14,7 @@
 import logging
 import re
 
+import editdistance
 import yaml
 
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
@@ -161,13 +162,14 @@ def get_inferred_links(vocabulary: list[dict], label_key: str) -> list[dict]:
     This function is the point of extending link inference capabilities. At this point, the link inference includes
 
     - :py:meth:`token sharing <wilhelm_python_sdk.vocabulary_parser.get_inferred_tokenization_links>`
+    - :py:meth:`token sharing <wilhelm_python_sdk.vocabulary_parser.get_levenshtein_links>`
 
     :param vocabulary:  A wilhelm-vocabulary repo YAML file deserialized
     :param label_key:  The name of the node attribute that will be used as the label in displaying the node
 
     :return: a list of link object, each of which has a "source_label", a "target_label", and an "attributes" key
     """
-    return get_inferred_tokenization_links(vocabulary, label_key)
+    return get_inferred_tokenization_links(vocabulary, label_key) + get_levenshtein_links(vocabulary, label_key)
 
 
 def get_definition_tokens(word: dict) -> set[str]:
@@ -268,5 +270,25 @@ def get_inferred_tokenization_links(vocabulary: list[dict], label_key: str) -> l
 
                 if jump_to_next_term:
                     break
+
+    return inferred_links
+
+
+def get_levenshtein_links(vocabulary: list[dict], label_key: str) -> list[dict]:
+    inferred_links = []
+
+    for this in vocabulary:
+        for that in vocabulary:
+            if this is that:
+                continue
+            this_term = this["term"]
+            that_term = that["term"]
+            distance = editdistance.eval(this_term, that_term)
+            if distance <= 3:
+                inferred_links.append({
+                    "source_label": this_term,
+                    "target_label": that_term,
+                    "attributes": {label_key: "structurally similar"},
+                })
 
     return inferred_links
