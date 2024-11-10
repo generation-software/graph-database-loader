@@ -129,6 +129,33 @@ class TestLoader(unittest.TestCase):
             get_inferred_links(vocabulary, label_key)
         )
 
+    def test_get_inferred_links_on_unrelated_terms_with_definition_definite_article(self):
+        vocabulary = yaml.safe_load("""
+            vocabulary:
+              - term: die Biographie
+                definition: (alternative spelling of) die Biografie
+                declension:
+                  - ["",         singular,   plural     ]
+                  - [nominative, Biographie, Biographien]
+                  - [genitive,   Biographie, Biographien]
+                  - [dative,     Biographie, Biographien]
+                  - [accusative, Biographie, Biographien]
+              - term: die Mittagspause
+                definition: the lunchbreak
+                declension:
+                  - ["",         singular,     plural       ]
+                  - [nominative, Mittagspause, Mittagspausen]
+                  - [genitive,   Mittagspause, Mittagspausen]
+                  - [dative,     Mittagspause, Mittagspausen]
+                  - [accusative, Mittagspause, Mittagspausen]
+        """)["vocabulary"]  # "die Biographie" has "die" in its definition
+        label_key = "name"
+
+        self.assertEqual(
+            [],
+            get_inferred_links(vocabulary, label_key)
+        )
+
     def test_get_definition_tokens(self):
         vocabulary = yaml.safe_load("""
                     vocabulary:
@@ -152,6 +179,17 @@ class TestLoader(unittest.TestCase):
             {"sieben", "vor", "viertel"},
             get_term_tokens(vocabulary[0])
         )
+
+    def test_get_term_tokens_do_not_include_indefinite_articles(self):
+        vocabulary = yaml.safe_load("""
+                    vocabulary:
+                      - term: der Brief
+                      - term: die Biographie
+                      - term: das Jahr
+                """)["vocabulary"]
+        self.assertEqual({"brief"}, get_term_tokens(vocabulary[0]))
+        self.assertEqual({"biographie"}, get_term_tokens(vocabulary[1]))
+        self.assertEqual({"jahr"}, get_term_tokens(vocabulary[2]))
 
     def test_get_declension_tokens(self):
         vocabulary = yaml.safe_load("""

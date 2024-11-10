@@ -36,7 +36,6 @@ EXCLUDED_DECLENSION_ENTRIES = [
     "accusative",
     "N/A"
 ]
-EXCLUDED_TOKENS = {"der", "die", "das", "the"}
 
 ENGLISH_PROPOSITIONS = {
     "about", "above", "across", "after", "against", "along", "among", "around", "at", "before", "behind", "below",
@@ -190,7 +189,7 @@ def get_term_tokens(word: dict) -> set[str]:
 
     for token in term.split(" "):
         cleansed = token.lower().strip()
-        if cleansed not in EXCLUDED_TOKENS:
+        if cleansed not in {"der", "die", "das"}:
             tokens.add(cleansed)
 
     return tokens
@@ -246,18 +245,18 @@ def get_inferred_tokenization_links(vocabulary: list[dict], label_key: str) -> l
 
     :return: a list of link object, each of which has a "source_label", a "target_label", and an "attributes" key
     """
-    tokenization = dict([word["term"], get_tokens_of(word)] for word in vocabulary)
+    all_vocabulary_tokenizations_by_term = dict([word["term"], get_tokens_of(word)] for word in vocabulary)
     inferred_links = []
-    for word in vocabulary:
-        this_term = word["term"]
+    for this_word in vocabulary:
+        this_term = this_word["term"]
 
-        for that_term, that_term_tokens in tokenization.items():
+        for that_term, that_term_tokens in all_vocabulary_tokenizations_by_term.items():
             jump_to_next_term = False
 
             if this_term == that_term:
                 continue
 
-            for this_token in this_term.split(" "):
+            for this_token in get_term_tokens(this_word):
                 for that_token in that_term_tokens:
                     if this_token.lower().strip() == that_token:
                         inferred_links.append({
