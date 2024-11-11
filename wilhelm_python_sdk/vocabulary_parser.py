@@ -168,7 +168,8 @@ def get_inferred_links(vocabulary: list[dict], label_key: str) -> list[dict]:
 
     :return: a list of link object, each of which has a "source_label", a "target_label", and an "attributes" key
     """
-    return get_inferred_tokenization_links(vocabulary, label_key) + get_levenshtein_links(vocabulary, label_key)
+    return (get_inferred_tokenization_links(vocabulary, label_key) +
+            get_structurally_similar_links(vocabulary, label_key))
 
 
 def get_definition_tokens(word: dict) -> set[str]:
@@ -273,7 +274,32 @@ def get_inferred_tokenization_links(vocabulary: list[dict], label_key: str) -> l
     return inferred_links
 
 
-def get_levenshtein_links(vocabulary: list[dict], label_key: str) -> list[dict]:
+def get_structurally_similar_links(vocabulary: list[dict], label_key: str) -> list[dict]:
+    """
+    Return a list of inferred links between structurally-related vocabulary terms.
+
+    This was inspired by the spotting the relationships among::
+
+        vocabulary:
+          - term: anschließen
+            definition: to connect
+          - term: anschließend
+            definition:
+              - (adj.) following
+              - (adv.) afterwards
+          - term: nachher
+            definition: (adv.) afterwards
+
+    Two words are structurally similar iff:
+
+    1. The edit distance are at most 3
+    2. Sharing the same word stem
+
+    :param vocabulary:  A wilhelm-vocabulary repo YAML file deserialized
+    :param label_key:  The name of the node attribute that will be used as the label in displaying the node
+
+    :return: a list of link object, each of which has a "source_label", a "target_label", and an "attributes" key
+    """
     inferred_links = []
 
     for this in vocabulary:
@@ -283,7 +309,7 @@ def get_levenshtein_links(vocabulary: list[dict], label_key: str) -> list[dict]:
             this_term = this["term"]
             that_term = that["term"]
             distance = editdistance.eval(this_term, that_term)
-            if distance <= 3:
+            if distance <= 3 and get_stem(this_term) == get_stem(that_term):
                 inferred_links.append({
                     "source_label": this_term,
                     "target_label": that_term,
@@ -291,3 +317,9 @@ def get_levenshtein_links(vocabulary: list[dict], label_key: str) -> list[dict]:
                 })
 
     return inferred_links
+
+
+def get_stem(word: str) -> str:
+    from nltk.stem.snowball import GermanStemmer
+    stemmer = GermanStemmer()
+    return stemmer.stem(word)
