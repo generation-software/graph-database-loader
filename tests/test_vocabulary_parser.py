@@ -15,6 +15,7 @@ import unittest
 
 import yaml
 
+from wilhelm_python_sdk.database_clients import Neo4jClient
 from wilhelm_python_sdk.vocabulary_parser import GERMAN
 from wilhelm_python_sdk.vocabulary_parser import get_attributes
 from wilhelm_python_sdk.vocabulary_parser import get_declension_tokens
@@ -98,8 +99,8 @@ class TestLoader(unittest.TestCase):
 
     def test_get_attributes(self):
         self.assertEqual(
-            {"name": "der Hut", "language": "German"} | HUT_DECLENSION_MAP,
-            get_attributes(yaml.safe_load(HUT_YAML), GERMAN, "name"),
+            {Neo4jClient.NODE_LABEL_PROP_KEY: "der Hut", "language": "German"} | HUT_DECLENSION_MAP,
+            get_attributes(yaml.safe_load(HUT_YAML), GERMAN, Neo4jClient.NODE_LABEL_PROP_KEY),
         )
 
     def test_get_inferred_links_on_unrelated_terms(self):
@@ -122,7 +123,7 @@ class TestLoader(unittest.TestCase):
                   - [dative,     Qualitätswein,                     Qualitätsweinen]
                   - [accusative, Qualitätswein,                     Qualitätsweine ]
         """)["vocabulary"]
-        label_key = "name"
+        label_key = Neo4jClient.NODE_LABEL_PROP_KEY
 
         self.assertEqual(
             [],
@@ -149,7 +150,7 @@ class TestLoader(unittest.TestCase):
                   - [dative,     Mittagspause, Mittagspausen]
                   - [accusative, Mittagspause, Mittagspausen]
         """)["vocabulary"]  # "die Biographie" has "die" in its definition
-        label_key = "name"
+        label_key = Neo4jClient.NODE_LABEL_PROP_KEY
 
         self.assertEqual(
             [],
@@ -228,12 +229,12 @@ class TestLoader(unittest.TestCase):
                   - [dative,     Reis,     Reisen]
                   - [accusative, Reis,     Reise ]
         """)["vocabulary"]
-        label_key = "name"
+        label_key = Neo4jClient.NODE_LABEL_PROP_KEY
 
         self.assertEqual(
             [
                 {
-                    'attributes': {'name': 'term related'},
+                    'attributes': {Neo4jClient.NODE_LABEL_PROP_KEY: 'term related'},
                     'source_label': 'die Reise',
                     'target_label': 'der Reis'
                 }
@@ -259,27 +260,27 @@ class TestLoader(unittest.TestCase):
               - term: in den letzten Jahren
                 definition: in recent years
         """)["vocabulary"]
-        label_key = "name"
+        label_key = Neo4jClient.NODE_LABEL_PROP_KEY
 
         self.assertEqual(
             [
                 {
-                    'attributes': {'name': 'term related'},
+                    'attributes': {Neo4jClient.NODE_LABEL_PROP_KEY: 'term related'},
                     'source_label': 'seit zwei Jahren',
                     'target_label': 'das Jahr'
                 },
                 {
-                    'attributes': {'name': 'term related'},
+                    'attributes': {Neo4jClient.NODE_LABEL_PROP_KEY: 'term related'},
                     'source_label': 'seit zwei Jahren',
                     'target_label': 'in den letzten Jahren'
                 },
                 {
-                    'attributes': {'name': 'term related'},
+                    'attributes': {Neo4jClient.NODE_LABEL_PROP_KEY: 'term related'},
                     'source_label': 'in den letzten Jahren',
                     'target_label': 'das Jahr'
                 },
                 {
-                    'attributes': {'name': 'term related'},
+                    'attributes': {Neo4jClient.NODE_LABEL_PROP_KEY: 'term related'},
                     'source_label': 'in den letzten Jahren',
                     'target_label': 'seit zwei Jahren'
                 }
@@ -299,17 +300,17 @@ class TestLoader(unittest.TestCase):
               - term: nachher
                 definition: (adv.) afterwards
         """)["vocabulary"]
-        label_key = "name"
+        label_key = Neo4jClient.NODE_LABEL_PROP_KEY
 
         self.assertEqual(
             [
                 {
-                    'attributes': {'name': 'structurally similar'},
+                    'attributes': {Neo4jClient.NODE_LABEL_PROP_KEY: 'structurally similar'},
                     'source_label': 'anschließen',
                     'target_label': 'anschließend'
                 },
                 {
-                    'attributes': {'name': 'structurally similar'},
+                    'attributes': {Neo4jClient.NODE_LABEL_PROP_KEY: 'structurally similar'},
                     'source_label': 'anschließend',
                     'target_label': 'anschließen'
                 }

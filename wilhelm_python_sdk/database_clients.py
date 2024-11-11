@@ -24,7 +24,7 @@ class Neo4jClient:
     DATABASE = os.environ["NEO4J_DATABASE"]
     AUTH = (os.environ["NEO4J_USERNAME"], os.environ["NEO4J_PASSWORD"])
 
-    NODE_LABEL_PROP_KEY = "name"
+    NODE_LABEL_PROP_KEY = "label"
 
     def __init__(self):
         self.driver = GraphDatabase.driver(Neo4jClient.URI, auth=Neo4jClient.AUTH)
