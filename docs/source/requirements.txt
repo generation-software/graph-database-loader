@@ -7,3 +7,4 @@ pyan3
 neo4j
 pyyaml
 editdistance
+nltk

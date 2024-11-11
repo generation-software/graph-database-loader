@@ -24,7 +24,7 @@ from wilhelm_python_sdk.vocabulary_parser import get_definitions
 from wilhelm_python_sdk.vocabulary_parser import get_inferred_links
 from wilhelm_python_sdk.vocabulary_parser import \
     get_inferred_tokenization_links
-from wilhelm_python_sdk.vocabulary_parser import get_levenshtein_links
+from wilhelm_python_sdk.vocabulary_parser import get_structurally_similar_links
 from wilhelm_python_sdk.vocabulary_parser import get_term_tokens
 
 UNKOWN_DECLENSION_NOUN_YAML = """
@@ -288,7 +288,7 @@ class TestLoader(unittest.TestCase):
             get_inferred_tokenization_links(vocabulary, label_key)
         )
 
-    def test_get_levenshtein_links(self):
+    def test_get_structurally_similar_links(self):
         vocabulary = yaml.safe_load("""
             vocabulary:
               - term: anschließen
@@ -315,5 +315,18 @@ class TestLoader(unittest.TestCase):
                     'target_label': 'anschließen'
                 }
             ],
-            get_levenshtein_links(vocabulary, label_key)
+            get_structurally_similar_links(vocabulary, label_key)
+        )
+
+    def test_get_structurally_similar_links_small_edit_distance_but_different_stem(self):
+        vocabulary = yaml.safe_load("""
+            vocabulary:
+              - term: die Bank
+              - term: die Sahne
+        """)["vocabulary"]
+        label_key = Neo4jClient.NODE_LABEL_PROP_KEY
+
+        self.assertEqual(
+            [],
+            get_structurally_similar_links(vocabulary, label_key)
         )
