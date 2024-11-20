@@ -26,6 +26,7 @@ from wilhelm_python_sdk.vocabulary_parser import \
     get_inferred_tokenization_links
 from wilhelm_python_sdk.vocabulary_parser import get_structurally_similar_links
 from wilhelm_python_sdk.vocabulary_parser import get_term_tokens
+from wilhelm_python_sdk.vocabulary_parser import is_structurally_similar
 
 UNKOWN_DECLENSION_NOUN_YAML = """
     term: die Grilltomate
@@ -330,3 +331,8 @@ class TestLoader(unittest.TestCase):
             [],
             get_structurally_similar_links(vocabulary, label_key)
         )
+
+    def test_is_structurally_similar(self):
+        self.assertTrue(is_structurally_similar("anschließen", "anschließend"))
+        self.assertTrue(is_structurally_similar("anschließend", "anschließen"))
+        self.assertFalse(is_structurally_similar("die Bank", "die Sahne"))

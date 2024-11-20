@@ -276,7 +276,8 @@ def get_inferred_tokenization_links(vocabulary: list[dict], label_key: str) -> l
 
 def get_structurally_similar_links(vocabulary: list[dict], label_key: str) -> list[dict]:
     """
-    Return a list of inferred links between structurally-related vocabulary terms.
+    Return a list of inferred links between structurally-related vocabulary terms that are determined by the function
+    :py:meth:`token sharing <wilhelm_python_sdk.vocabulary_parser.is_structurally_similar>`.
 
     This was inspired by the spotting the relationships among::
 
@@ -290,11 +291,6 @@ def get_structurally_similar_links(vocabulary: list[dict], label_key: str) -> li
           - term: nachher
             definition: (adv.) afterwards
 
-    Two words are structurally similar iff:
-
-    1. The edit distance are at most 3
-    2. Sharing the same word stem
-
     :param vocabulary:  A wilhelm-vocabulary repo YAML file deserialized
     :param label_key:  The name of the node attribute that will be used as the label in displaying the node
 
@@ -304,12 +300,9 @@ def get_structurally_similar_links(vocabulary: list[dict], label_key: str) -> li
 
     for this in vocabulary:
         for that in vocabulary:
-            if this is that:
-                continue
             this_term = this["term"]
             that_term = that["term"]
-            distance = editdistance.eval(this_term, that_term)
-            if distance <= 3 and get_stem(this_term) == get_stem(that_term):
+            if is_structurally_similar(this_term, that_term):
                 inferred_links.append({
                     "source_label": this_term,
                     "target_label": that_term,
@@ -317,6 +310,24 @@ def get_structurally_similar_links(vocabulary: list[dict], label_key: str) -> li
                 })
 
     return inferred_links
+
+
+def is_structurally_similar(this_word: str, that_word: str) -> bool:
+    """
+    Returns whether or not two string words are structurally similar.
+
+    Two words are structurally similar iff the two share the same word stem. If two word strings are equal, this
+    function returns `False`.
+
+    :param this_word:  The first word to compare structurally
+    :param that_word:  The second word to compare structurally
+
+    :return: `True` if two words are structurally similar, or `False` otherwise
+    """
+    if this_word is that_word:
+        return False
+
+    return get_stem(this_word) == get_stem(that_word)
 
 
 def get_stem(word: str) -> str:
