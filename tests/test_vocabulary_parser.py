@@ -15,15 +15,15 @@ import unittest
 
 import yaml
 
-from wilhelm_python_sdk.database_clients import Neo4jClient
+from wilhelm_python_sdk.german_parser import get_declension_attributes
 from wilhelm_python_sdk.vocabulary_parser import GERMAN
 from wilhelm_python_sdk.vocabulary_parser import get_attributes
-from wilhelm_python_sdk.vocabulary_parser import get_declension_tokens
 from wilhelm_python_sdk.vocabulary_parser import get_definition_tokens
 from wilhelm_python_sdk.vocabulary_parser import get_definitions
 from wilhelm_python_sdk.vocabulary_parser import get_inferred_links
 from wilhelm_python_sdk.vocabulary_parser import \
     get_inferred_tokenization_links
+from wilhelm_python_sdk.vocabulary_parser import get_inflection_tokens
 from wilhelm_python_sdk.vocabulary_parser import get_structurally_similar_links
 from wilhelm_python_sdk.vocabulary_parser import get_term_tokens
 from wilhelm_python_sdk.vocabulary_parser import is_structurally_similar
@@ -34,41 +34,10 @@ UNKOWN_DECLENSION_NOUN_YAML = """
     declension: Unknown
 """
 
-HUT_YAML = """
-    term: der Hut
-    definition: the hat
-    declension:
-      - ["",         singular,      plural]
-      - [nominative, Hut,           Hüte  ]
-      - [genitive,   "Hutes, Huts", Hüte  ]
-      - [dative,     Hut,           Hüten ]
-      - [accusative, Hut,           Hüte  ]
-"""
-
-HUT_DECLENSION_MAP = {
-    "declension-0-0": "",
-    "declension-0-1": "singular",
-    "declension-0-2": "plural",
-
-    "declension-1-0": "nominative",
-    "declension-1-1": "Hut",
-    "declension-1-2": "Hüte",
-
-    "declension-2-0": "genitive",
-    "declension-2-1": "Hutes, Huts",
-    "declension-2-2": "Hüte",
-
-    "declension-3-0": "dative",
-    "declension-3-1": "Hut",
-    "declension-3-2": "Hüten",
-
-    "declension-4-0": "accusative",
-    "declension-4-1": "Hut",
-    "declension-4-2": "Hüte",
-}
+LABEL_KEY = "label"
 
 
-class TestLoader(unittest.TestCase):
+class TestVocabularyParser(unittest.TestCase):
 
     def test_get_definitions(self):
         self.assertEqual(
@@ -98,10 +67,25 @@ class TestLoader(unittest.TestCase):
         with self.assertRaises(ValueError):
             get_definitions({"defintion": "I'm 23 years old."})
 
-    def test_get_attributes(self):
+    def test_get_attributes_basic(self):
         self.assertEqual(
-            {Neo4jClient.NODE_LABEL_PROP_KEY: "der Hut", "language": "German"} | HUT_DECLENSION_MAP,
-            get_attributes(yaml.safe_load(HUT_YAML), GERMAN, Neo4jClient.NODE_LABEL_PROP_KEY),
+            {"label": "der Hut", "language": "German"},
+            get_attributes({"term": "der Hut", "definition": "the hat"}, GERMAN, LABEL_KEY),
+        )
+
+    def test_get_attributes_with_custom_inflection(self):
+        self.assertEqual(
+            {"label": "der Hut", "language": "German", "inflection": {"declension": "..."}},
+            get_attributes(
+                {
+                    "term": "der Hut",
+                    "definition": "the hat",
+                    "inflection": {"declension": "...", "inflection": None}
+                },
+                GERMAN,
+                LABEL_KEY,
+                lambda word: {"inflection": {"declension": "..."}}
+            ),
         )
 
     def test_get_inferred_links_on_unrelated_terms(self):
@@ -124,14 +108,14 @@ class TestLoader(unittest.TestCase):
                   - [dative,     Qualitätswein,                     Qualitätsweinen]
                   - [accusative, Qualitätswein,                     Qualitätsweine ]
         """)["vocabulary"]
-        label_key = Neo4jClient.NODE_LABEL_PROP_KEY
+        label_key = LABEL_KEY
 
         self.assertEqual(
             [],
-            get_inferred_links(vocabulary, label_key)
+            get_inferred_links(vocabulary, label_key, get_declension_attributes)
         )
 
-    def test_get_inferred_links_on_unrelated_terms_with_definition_definite_article(self):
+    def test_get_inferred_links_on_unrelated_terms_with_same_definite_article(self):
         vocabulary = yaml.safe_load("""
             vocabulary:
               - term: die Biographie
@@ -151,11 +135,11 @@ class TestLoader(unittest.TestCase):
                   - [dative,     Mittagspause, Mittagspausen]
                   - [accusative, Mittagspause, Mittagspausen]
         """)["vocabulary"]  # "die Biographie" has "die" in its definition
-        label_key = Neo4jClient.NODE_LABEL_PROP_KEY
+        label_key = LABEL_KEY
 
         self.assertEqual(
             [],
-            get_inferred_links(vocabulary, label_key)
+            get_inferred_links(vocabulary, label_key, get_declension_attributes)
         )
 
     def test_get_definition_tokens(self):
@@ -207,10 +191,10 @@ class TestLoader(unittest.TestCase):
                 """)["vocabulary"]
         self.assertEqual(
             {"jahres", "jahre", "jahr", "jahren", "jahrs"},
-            get_declension_tokens(vocabulary[0])
+            get_inflection_tokens(vocabulary[0], get_declension_attributes)
         )
 
-    def test_two_words_shring_somoe_same_declension_table_entries(self):
+    def test_two_words_shring_some_same_declension_table_entries(self):
         vocabulary = yaml.safe_load("""
             vocabulary:
               - term: die Reise
@@ -230,17 +214,16 @@ class TestLoader(unittest.TestCase):
                   - [dative,     Reis,     Reisen]
                   - [accusative, Reis,     Reise ]
         """)["vocabulary"]
-        label_key = Neo4jClient.NODE_LABEL_PROP_KEY
 
         self.assertEqual(
             [
                 {
-                    'attributes': {Neo4jClient.NODE_LABEL_PROP_KEY: 'term related'},
+                    'attributes': {LABEL_KEY: 'term related'},
                     'source_label': 'die Reise',
                     'target_label': 'der Reis'
                 }
             ],
-            get_inferred_tokenization_links(vocabulary, label_key)
+            get_inferred_tokenization_links(vocabulary, LABEL_KEY, get_declension_attributes)
         )
 
     def test_get_inferred_tokenization_links(self):
@@ -261,32 +244,31 @@ class TestLoader(unittest.TestCase):
               - term: in den letzten Jahren
                 definition: in recent years
         """)["vocabulary"]
-        label_key = Neo4jClient.NODE_LABEL_PROP_KEY
 
         self.assertEqual(
             [
                 {
-                    'attributes': {Neo4jClient.NODE_LABEL_PROP_KEY: 'term related'},
+                    'attributes': {LABEL_KEY: 'term related'},
                     'source_label': 'seit zwei Jahren',
                     'target_label': 'das Jahr'
                 },
                 {
-                    'attributes': {Neo4jClient.NODE_LABEL_PROP_KEY: 'term related'},
+                    'attributes': {LABEL_KEY: 'term related'},
                     'source_label': 'seit zwei Jahren',
                     'target_label': 'in den letzten Jahren'
                 },
                 {
-                    'attributes': {Neo4jClient.NODE_LABEL_PROP_KEY: 'term related'},
+                    'attributes': {LABEL_KEY: 'term related'},
                     'source_label': 'in den letzten Jahren',
                     'target_label': 'das Jahr'
                 },
                 {
-                    'attributes': {Neo4jClient.NODE_LABEL_PROP_KEY: 'term related'},
+                    'attributes': {LABEL_KEY: 'term related'},
                     'source_label': 'in den letzten Jahren',
                     'target_label': 'seit zwei Jahren'
                 }
             ],
-            get_inferred_tokenization_links(vocabulary, label_key)
+            get_inferred_tokenization_links(vocabulary, LABEL_KEY, get_declension_attributes)
         )
 
     def test_get_structurally_similar_links(self):
@@ -301,17 +283,17 @@ class TestLoader(unittest.TestCase):
               - term: nachher
                 definition: (adv.) afterwards
         """)["vocabulary"]
-        label_key = Neo4jClient.NODE_LABEL_PROP_KEY
+        label_key = LABEL_KEY
 
         self.assertEqual(
             [
                 {
-                    'attributes': {Neo4jClient.NODE_LABEL_PROP_KEY: 'structurally similar'},
+                    'attributes': {LABEL_KEY: 'structurally similar'},
                     'source_label': 'anschließen',
                     'target_label': 'anschließend'
                 },
                 {
-                    'attributes': {Neo4jClient.NODE_LABEL_PROP_KEY: 'structurally similar'},
+                    'attributes': {LABEL_KEY: 'structurally similar'},
                     'source_label': 'anschließend',
                     'target_label': 'anschließen'
                 }
@@ -325,7 +307,7 @@ class TestLoader(unittest.TestCase):
               - term: die Bank
               - term: die Sahne
         """)["vocabulary"]
-        label_key = Neo4jClient.NODE_LABEL_PROP_KEY
+        label_key = LABEL_KEY
 
         self.assertEqual(
             [],

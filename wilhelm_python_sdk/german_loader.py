@@ -13,6 +13,7 @@
 # limitations under the License.
 from wilhelm_python_sdk.database_clients import get_database_client
 from wilhelm_python_sdk.database_clients import get_node_label_attribute_key
+from wilhelm_python_sdk.german_parser import get_declension_attributes
 from wilhelm_python_sdk.vocabulary_parser import GERMAN
 from wilhelm_python_sdk.vocabulary_parser import get_attributes
 from wilhelm_python_sdk.vocabulary_parser import get_definitions
@@ -31,7 +32,7 @@ def load_into_database(yaml_path: str):
 
     with get_database_client() as database_client:
         for word in vocabulary:
-            attributes = get_attributes(word, GERMAN, label_key)
+            attributes = get_attributes(word, GERMAN, label_key, get_declension_attributes)
             database_client.save_a_node_with_attributes("Term", attributes)
             definitions = get_definitions(word)
             for definition_with_predicate in definitions:
@@ -61,7 +62,7 @@ def load_into_database(yaml_path: str):
                     )
 
         # save link_hints as database links
-        for link in get_inferred_links(vocabulary, label_key):
+        for link in get_inferred_links(vocabulary, label_key, get_declension_attributes):
             database_client.save_a_link_with_attributes(
                 language=GERMAN,
                 source_label=link["source_label"],
