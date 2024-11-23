@@ -13,17 +13,40 @@
 # limitations under the License.
 import logging
 import re
+from typing import Callable
 
-import editdistance
 import yaml
 
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 
+"""
+The language identifier for German language.
+
+.. py:data:: GERMAN
+   :value: German
+   :type: string
+"""
 GERMAN = "German"
+
+"""
+The language identifier for Latin language.
+
+.. py:data:: LATIN
+   :value: Latin
+   :type: string
+"""
 LATIN = "Latin"
+
+"""
+The language identifier for Ancient Greek.
+
+.. py:data:: ANCIENT_GREEK
+   :value: Ancient Greek
+   :type: string
+"""
 ANCIENT_GREEK = "Ancient Greek"
 
-EXCLUDED_DECLENSION_ENTRIES = [
+EXCLUDED_INFLECTION_ENTRIES = [
     "",
     "singular",
     "plural",
@@ -56,7 +79,7 @@ def get_definitions(word) -> list[(str, str)]:
     Extract definitions from a word as a list of bi-tuples, with the first element being the predicate and the second
     being the definition.
 
-    For example::
+    For example (in YAML)::
 
     definition:
       - term: nämlich
@@ -71,7 +94,7 @@ def get_definitions(word) -> list[(str, str)]:
 
     definition:
       - term: na klar
-        definition:
+        definition: of course
 
     returns a list of one tupple `[(None, "of course")]`
 
@@ -106,55 +129,32 @@ def get_definitions(word) -> list[(str, str)]:
     return predicate_with_definition
 
 
-def get_declension_attributes(word: object) -> dict[str, str]:
-    """
-    Returns the declension of a word.
-
-    If the word does not have a "declension" field, the function returns an empty dictionary.
-
-    If the noun's declension is, for some reasons, "Unknown", this function will return an empty dict. Otherwise, the
-    declension table is flattened like with row-col index in the map key::
-
-    "declension-0-0": "",
-    "declension-0-1": "singular",
-    "declension-0-2": "singular",
-    "declension-0-3": "singular",
-    "declension-0-4": "plural",
-    "declension-0-5": "plural",
-
-    :param word:  A vocabulary represented in YAML dictionary which has a "declension" key
-
-    :return: a flat map containing all the YAML encoded information about the noun excluding term and definition
-    """
-
-    if "declension" not in word:
-        return {}
-
-    declension = word["declension"]
-
-    if declension == "Unknown":
-        return {}
-
-    attributes = {}
-    for i, row in enumerate(declension):
-        for j, col in enumerate(row):
-            attributes[f"declension-{i}-{j}"] = declension[i][j]
-
-    return attributes
-
-
-def get_attributes(word: object, language: str, node_label_property_key: str) -> dict[str, str]:
+def get_attributes(
+        word: object,
+        language: str,
+        node_label_attribute_key: str,
+        inflection_supplier: Callable[[object], dict]=lambda word: {}
+) -> dict[str, str]:
     """
     Returns a flat map as the Term node properties stored in Neo4J.
 
     :param word:  A German vocabulary representing
+    :param language:  The language of the vocabulary. Can only be one of the constants defined in this file:
+    :py:data:`GERMAN` / :py:data:`LATIN` / :py:data:`ANCIENT_GREEK`
+    :param node_label_attribute_key:  The attribute key in the returned map whose value contains the node caption
+    :param inflection_supplier:  A functional object that, given a YAML dictionary, returns the inflection table of that
+    word. The key of the table can be arbitrary but the value must be a sole inflected word
 
     :return: a flat map containing all the YAML encoded information about the vocabulary
     """
-    return {node_label_property_key: word["term"], "language": language} | get_declension_attributes(word)
+    return {node_label_attribute_key: word["term"], "language": language} | inflection_supplier(word)
 
 
-def get_inferred_links(vocabulary: list[dict], label_key: str) -> list[dict]:
+def get_inferred_links(
+        vocabulary: list[dict],
+        label_key: str,
+        inflection_supplier: Callable[[object], dict[str, str]]=lambda word: {}
+) -> list[dict]:
     """
     Return a list of inferred links between related vocabularies.
 
@@ -165,10 +165,12 @@ def get_inferred_links(vocabulary: list[dict], label_key: str) -> list[dict]:
 
     :param vocabulary:  A wilhelm-vocabulary repo YAML file deserialized
     :param label_key:  The name of the node attribute that will be used as the label in displaying the node
+    :param inflection_supplier:  A functional object that, given a YAML dictionary, returns the inflection table of that
+    word. The key of the table can be arbitrary but the value must be a sole inflected word
 
     :return: a list of link object, each of which has a "source_label", a "target_label", and an "attributes" key
     """
-    return (get_inferred_tokenization_links(vocabulary, label_key) +
+    return (get_inferred_tokenization_links(vocabulary, label_key, inflection_supplier) +
             get_structurally_similar_links(vocabulary, label_key))
 
 
@@ -196,23 +198,30 @@ def get_term_tokens(word: dict) -> set[str]:
     return tokens
 
 
-def get_declension_tokens(word: dict) -> set[str]:
+def get_inflection_tokens(
+        word: dict,
+        inflection_supplier: Callable[[object], dict[str, str]]=lambda word: {}
+) -> set[str]:
     tokens = set()
 
-    for key, value in get_declension_attributes(word).items():
-        if value not in EXCLUDED_DECLENSION_ENTRIES:
-            for declension in value.split(","):
-                cleansed = declension.lower().strip()
+    for key, value in inflection_supplier(word).items():
+        if value not in EXCLUDED_INFLECTION_ENTRIES:
+            for inflection in value.split(","):
+                cleansed = inflection.lower().strip()
                 tokens.add(cleansed)
 
     return tokens
 
 
-def get_tokens_of(word: dict) -> set[str]:
-    return get_declension_tokens(word) | get_term_tokens(word) | get_definition_tokens(word)
+def get_tokens_of(word: dict, inflection_supplier: Callable[[object], dict[str, str]]=lambda word: {}) -> set[str]:
+    return get_inflection_tokens(word, inflection_supplier) | get_term_tokens(word) | get_definition_tokens(word)
 
 
-def get_inferred_tokenization_links(vocabulary: list[dict], label_key: str) -> list[dict]:
+def get_inferred_tokenization_links(
+        vocabulary: list[dict],
+        label_key: str,
+        inflection_supplier: Callable[[object], dict[str, str]]=lambda word: {}
+) -> list[dict]:
     """
     Return a list of inferred links between related vocabulary terms which are related to one another.
 
@@ -246,7 +255,8 @@ def get_inferred_tokenization_links(vocabulary: list[dict], label_key: str) -> l
 
     :return: a list of link object, each of which has a "source_label", a "target_label", and an "attributes" key
     """
-    all_vocabulary_tokenizations_by_term = dict([word["term"], get_tokens_of(word)] for word in vocabulary)
+    all_vocabulary_tokenizations_by_term = dict(
+        [word["term"], get_tokens_of(word, inflection_supplier)] for word in vocabulary)
     inferred_links = []
     for this_word in vocabulary:
         this_term = this_word["term"]
