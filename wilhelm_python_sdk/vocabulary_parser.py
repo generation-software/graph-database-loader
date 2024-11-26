@@ -138,7 +138,7 @@ def get_attributes(
     """
     Returns a flat map as the Term node properties stored in Neo4J.
 
-    :param word:  A German vocabulary representing
+    :param word:  A dict object representing a vocabulary
     :param language:  The language of the vocabulary. Can only be one of the constants defined in this file:
     :py:data:`GERMAN` / :py:data:`LATIN` / :py:data:`ANCIENT_GREEK`
     :param node_label_attribute_key:  The attribute key in the returned map whose value contains the node caption
@@ -147,7 +147,24 @@ def get_attributes(
 
     :return: a flat map containing all the YAML encoded information about the vocabulary
     """
-    return {node_label_attribute_key: word["term"], "language": language} | inflection_supplier(word)
+    return {node_label_attribute_key: word["term"], "language": language} | inflection_supplier(word) | get_audio(word)
+
+
+def get_audio(word: object) -> dict:
+    """
+    Returns the pronunciation of a word in the form of a map with key being "audio" and value being a string pointing to
+    the URL of the audio file.
+
+    The word should be a dict object containing an "audio" string attribute, otherwise this function returns an empty
+    map
+
+    :param word:  A dict object representing a vocabulary
+
+    :return: a single-entry map or empty map
+    """
+    if "audio" not in word:
+        return {}
+    return {"audio": word["audio"]}
 
 
 def get_inferred_links(
