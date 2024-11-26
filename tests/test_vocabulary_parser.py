@@ -88,6 +88,24 @@ class TestVocabularyParser(unittest.TestCase):
             ),
         )
 
+    def test_get_attributes_with_audio(self):
+        self.assertEqual(
+            {
+                "label": "der Hut",
+                "language": "German",
+                "audio": "https://upload.wikimedia.org/wikipedia/commons/e/e9/De-Hut.ogg"
+            },
+            get_attributes(
+                {
+                    "term": "der Hut",
+                    "definition": "the hat",
+                    "audio": "https://upload.wikimedia.org/wikipedia/commons/e/e9/De-Hut.ogg"
+                },
+                GERMAN,
+                LABEL_KEY
+            ),
+        )
+
     def test_get_inferred_links_on_unrelated_terms(self):
         vocabulary = yaml.safe_load("""
             vocabulary:
