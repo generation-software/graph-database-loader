@@ -171,6 +171,7 @@ jobs:
     needs: tests-wilhelm-vocabulary-loading
     if: github.ref == 'refs/heads/master'
     uses: ./.github/workflows/load-neo4j.yaml
+    secrets: inherit
 
   package:
     name: Test Package Build
