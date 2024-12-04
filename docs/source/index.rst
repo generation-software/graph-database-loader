@@ -83,7 +83,7 @@ Development
 
 Create virtual environment and install dependencies::
 
-    git@github.com:QubitPi/wilhelm-python-sdk.git
+    git@github.com:QubitPi/wilhelm-data-loader.git
     cdwilhelm_data_loader
     python3 -m venv .venv
     . .venv/bin/activate

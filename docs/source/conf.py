@@ -18,7 +18,7 @@ sys.path.insert(0, os.path.abspath('../../'))
 
 # -- Project information -----------------------------------------------------
 
-project = 'wilhelm-python-sdk'
+project = 'wilhelm-data-loader'
 copyright = '2024, Jiaqi Liu'
 author = 'Jiaqi Liu'
 
