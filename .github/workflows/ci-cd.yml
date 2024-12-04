@@ -168,7 +168,7 @@ jobs:
 
   cleanup-neo4j:
     if: github.ref == 'refs/heads/master'
-    needs: [tests, docker]
+    needs: tests-wilhelm-vocabulary-loading
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
