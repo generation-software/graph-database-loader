@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from wilhelm_data_loader.database_manager import cleanup_neo4j
+from database.database_manager import cleanup_neo4j
 
 if __name__ == "__main__":
     cleanup_neo4j()

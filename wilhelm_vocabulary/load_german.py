@@ -13,7 +13,7 @@
 # limitations under the License.
 from datasets import load_dataset
 
-from wilhelm_data_loader.database_clients import get_database_client
+from database.database_clients import get_database_client
 
 
 def load_into_database():
