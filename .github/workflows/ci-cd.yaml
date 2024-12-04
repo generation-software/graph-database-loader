@@ -168,6 +168,7 @@ jobs:
           NEO4J_PASSWORD: ${{ env.TEST_NEO4J_PASSWORD }}
 
   load-neo4j:
+    needs: tests-wilhelm-vocabulary-loading
     if: github.ref == 'refs/heads/master'
     uses: ./.github/workflows/load-neo4j.yaml
 
