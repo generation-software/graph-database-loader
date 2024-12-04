@@ -18,6 +18,53 @@ pip install wilhelm-python-sdk
 
 Details documentations can be found at [sdk.wilhelmlang.com](https://sdk.wilhelmlang.com/)
 
+Development
+-----------
+
+### Environment Setup
+
+Get the source code:
+
+```console
+git clone git@github.com:QubitPi/wilhelm-data-loader.git
+cd wilhelm-data-loader
+```
+
+It is strongly recommended to work in an isolated environment. Install virtualenv and create an isolated Python
+environment by
+
+```console
+python3 -m pip install --user -U virtualenv
+python3 -m virtualenv .venv
+```
+
+To activate this environment:
+
+```console
+source .venv/bin/activate
+```
+
+or, on Windows
+
+```console
+./venv\Scripts\activate
+```
+
+> [!TIP]
+> 
+> To deactivate this environment, use
+> 
+> ```console
+> deactivate
+> ```
+
+### Installing Dependencies
+
+```console
+pip3 install -r requirements.txt
+```
+
+
 License
 -------
 
