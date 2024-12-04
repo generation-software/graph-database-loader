@@ -230,7 +230,7 @@ jobs:
 
   package:
     name: Test Package Build
-    needs: integration-tests
+    needs: [tests-wilhelm-vocabulary-loading]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
