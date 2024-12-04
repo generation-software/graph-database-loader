@@ -20,15 +20,14 @@ import load_german
 import load_latin
 
 if __name__ == "__main__":
-    queue = Queue()
-
-    latin = Process(target=load_latin.load_into_database(), args=(queue, ))
-    german = Process(target=load_german.load_into_database(), args=(queue, ))
-    ancient_greek = Process(target=load_ancient_greek.load_into_database(), args=(queue, ))
+    latin = Process(target=load_latin.load_into_database())
+    german = Process(target=load_german.load_into_database())
+    ancient_greek = Process(target=load_ancient_greek.load_into_database())
 
     latin.start()
     german.start()
     ancient_greek.start()
 
-    # Blocking
-    result = queue.get()
+    latin.join()
+    german.join()
+    ancient_greek.join()
