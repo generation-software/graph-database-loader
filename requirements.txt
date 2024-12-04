@@ -1,4 +1,4 @@
-datasets>=3.1.0
+datasets
 neo4j
 pyyaml
 nltk
