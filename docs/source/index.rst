@@ -10,7 +10,7 @@ Install
 
 To install the SDK, simply run::
 
-    pip install wilhelm-python-sdk
+    pip installwilhelm_data_loader
 
 Load Wilhelm Vocabularies into Neo4J Database
 =============================================
@@ -84,7 +84,7 @@ Development
 Create virtual environment and install dependencies::
 
     git@github.com:QubitPi/wilhelm-python-sdk.git
-    cd wilhelm-python-sdk
+    cdwilhelm_data_loader
     python3 -m venv .venv
     . .venv/bin/activate
 
