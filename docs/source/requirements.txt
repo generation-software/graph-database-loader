@@ -8,3 +8,4 @@ neo4j
 pyyaml
 editdistance
 nltk
+datasets
