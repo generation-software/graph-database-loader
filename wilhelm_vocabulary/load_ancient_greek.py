@@ -22,7 +22,8 @@ def load_into_database():
     with get_database_client() as database_client:
         graph = dataset["AncientGreek"].iter(batch_size=1)
         for triple in graph:
-            database_client.save_a_node_with_attributes("Term", triple["source"][0])
+            source_node_attributes = {k: v for k, v in triple["source"][0].items() if v}
+            database_client.save_a_node_with_attributes("Term", source_node_attributes)
 
 
 if __name__ == "__main__":
