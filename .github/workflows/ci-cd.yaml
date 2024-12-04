@@ -167,67 +167,9 @@ jobs:
           NEO4J_USERNAME: ${{ env.TEST_NEO4J_USERNAME }}
           NEO4J_PASSWORD: ${{ env.TEST_NEO4J_PASSWORD }}
 
-  cleanup-neo4j:
+  load-neo4j:
     if: github.ref == 'refs/heads/master'
-    needs: tests-wilhelm-vocabulary-loading
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v3
-        with:
-          fetch-depth: 0
-      - name: Set up Python ${{ env.PYTHON_VERSION }}
-        uses: actions/setup-python@v4
-        with:
-          python-version: ${{ env.PYTHON_VERSION }}
-      - name: Cleanup
-        run: |
-          pip3 install -e .
-          python3 wilhelm_vocabulary/cleanup_neo4j.py
-        env:
-          NEO4J_URI: ${{ secrets.NEO4J_URI }}
-          NEO4J_DATABASE: ${{ secrets.NEO4J_DATABASE }}
-          NEO4J_USERNAME: ${{ secrets.NEO4J_USERNAME }}
-          NEO4J_PASSWORD: ${{ secrets.NEO4J_PASSWORD }}
-
-  load-vocabulary:
-    name: Load ${{ matrix.language.name }} vocabularies
-    if: github.ref == 'refs/heads/master'
-    needs: cleanup-neo4j
-    runs-on: ubuntu-latest
-    strategy:
-      fail-fast: false
-      matrix:
-        language: [
-          {
-            name: German,
-            load-script: wilhelm_vocabulary/load_german.py
-          },
-          {
-            name: Ancient Greek,
-            load-script: wilhelm_vocabulary/load_ancient_greek.py
-          },
-          {
-            name: Latin,
-            load-script: wilhelm_vocabulary/load_latin.py
-          }
-        ]
-    steps:
-      - uses: actions/checkout@v3
-        with:
-          fetch-depth: 0
-      - name: Set up Python ${{ env.PYTHON_VERSION }}
-        uses: actions/setup-python@v4
-        with:
-          python-version: ${{ env.PYTHON_VERSION }}
-      - name: Load ${{ matrix.language.name }}
-        run: |
-          pip3 install -e .
-          python3 ${{ matrix.language.load-script }}
-        env:
-          NEO4J_URI: ${{ secrets.NEO4J_URI }}
-          NEO4J_DATABASE: ${{ secrets.NEO4J_DATABASE }}
-          NEO4J_USERNAME: ${{ secrets.NEO4J_USERNAME }}
-          NEO4J_PASSWORD: ${{ secrets.NEO4J_PASSWORD }}
+    uses: ./.github/workflows/load-neo4j.yaml
 
   package:
     name: Test Package Build
