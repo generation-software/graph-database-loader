@@ -15,9 +15,9 @@
 from multiprocessing import Process
 from multiprocessing import Queue
 
+import load_ancient_greek
 import load_german
 import load_latin
-import load_ancient_greek
 
 if __name__ == "__main__":
     queue = Queue()
