@@ -159,6 +159,7 @@ jobs:
       - name: Test loading ${{ matrix.language.name }}
         run: |
           pip3 install -r requirements.txt
+          pip3 install -e .
           python3 ${{ matrix.language.load-script }}
         env:
           NEO4J_URI: ${{ env.TEST_NEO4J_URI }}

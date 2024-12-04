@@ -10,10 +10,10 @@ Wilhelm Data Loader
 Wilhelm Data Loader is a data pipeline that reads  [Wilhelm](https://wilhelmlang.com/)'s vocabulary data from supported
 data sources and loads them into graph databases
 
-To install the SDK, simply run
+Some features can be reused as SDK which can be installed via
 
 ```console
-pip install wilhelm-python-sdk
+pip install wilhelm_data_loader
 ```
 
 Details documentations can be found at [sdk.wilhelmlang.com](https://sdk.wilhelmlang.com/)
