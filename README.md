@@ -1,5 +1,5 @@
-Wilhelm Python SDK
-==================
+Wilhelm Data Loader
+===================
 
 ![Python Version][Python Version Badge]
 [![Read the Docs][Read the Docs badge]][Read the Docs URL]
@@ -7,8 +7,8 @@ Wilhelm Python SDK
 [![GitHub Workflow Status][GitHub Workflow Status badge]][GitHub Workflow Status URL]
 [![Apache License badge]][Apache License URL]
 
-Wilhelm Python SDK offers a programmatic approach to interact with [Wilhelm](https://wilhelmlang.com/), including its
-graph database, backend webservice, and NLP capabilities
+Wilhelm Data Loader is a data pipeline that reads  [Wilhelm](https://wilhelmlang.com/)'s vocabulary data from supported
+data sources and loads them into graph databases
 
 To install the SDK, simply run
 
@@ -51,9 +51,9 @@ or, on Windows
 ```
 
 > [!TIP]
-> 
+>
 > To deactivate this environment, use
-> 
+>
 > ```console
 > deactivate
 > ```
@@ -63,7 +63,6 @@ or, on Windows
 ```console
 pip3 install -r requirements.txt
 ```
-
 
 License
 -------
