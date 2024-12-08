@@ -16,17 +16,24 @@ from datasets import load_dataset
 from database.database_clients import get_database_client
 
 
-def load_into_database():
+def is_definition_node(node):
+    return node["language"] is None
+
+
+def load_into_database_by_split(split: str):
     dataset = load_dataset("QubitPi/wilhelm-vocabulary")
 
     with get_database_client() as database_client:
-        graph = dataset["German"].iter(batch_size=1)
+        graph = dataset[split].iter(batch_size=1)
         for triple in graph:
             source_node_attributes = {k: v for k, v in triple["source"][0].items() if v}
             database_client.save_a_node_with_attributes("Term", source_node_attributes)
 
             target_node_attributes = {k: v for k, v in triple["target"][0].items() if v}
-            database_client.save_a_node_with_attributes("Term", target_node_attributes)
+            database_client.save_a_node_with_attributes(
+                "Definition" if is_definition_node(triple["target"][0]) else "Term",
+                target_node_attributes
+            )
 
             link = triple["link"][0]
             database_client.save_a_link_with_attributes(
@@ -35,6 +42,10 @@ def load_into_database():
                 target_label=target_node_attributes["label"],
                 attributes=link
             )
+
+
+def load_into_database():
+    load_into_database_by_split("German")
 
 
 if __name__ == "__main__":

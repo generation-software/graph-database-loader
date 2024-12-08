@@ -13,7 +13,6 @@
 # limitations under the License.
 
 from multiprocessing import Process
-from multiprocessing import Queue
 
 import load_ancient_greek
 import load_german
