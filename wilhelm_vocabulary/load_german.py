@@ -25,6 +25,17 @@ def load_into_database():
             source_node_attributes = {k: v for k, v in triple["source"][0].items() if v}
             database_client.save_a_node_with_attributes("Term", source_node_attributes)
 
+            target_node_attributes = {k: v for k, v in triple["target"][0].items() if v}
+            database_client.save_a_node_with_attributes("Term", target_node_attributes)
+
+            link = triple["link"][0]
+            database_client.save_a_link_with_attributes(
+                language="German",
+                source_label=source_node_attributes["label"],
+                target_label=target_node_attributes["label"],
+                attributes=link
+            )
+
 
 if __name__ == "__main__":
     load_into_database()
