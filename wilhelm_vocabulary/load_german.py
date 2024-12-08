@@ -15,6 +15,12 @@ from datasets import load_dataset
 
 from database.database_clients import get_database_client
 
+splitToLanguage = {
+    "German": "German",
+    "Latin": "Latin",
+    "AncientGreek": "Ancient Greek"
+}
+
 
 def is_definition_node(node):
     return node["language"] is None
@@ -37,7 +43,7 @@ def load_into_database_by_split(split: str):
 
             link = triple["link"][0]
             database_client.save_a_link_with_attributes(
-                language="German",
+                language=splitToLanguage[split],
                 source_label=source_node_attributes["label"],
                 target_label=target_node_attributes["label"],
                 attributes=link
