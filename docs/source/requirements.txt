@@ -5,6 +5,7 @@ sphinx-rtd-theme==1.0.0
 pycodestyle
 pyan3
 neo4j
+python-arango
 pyyaml
 editdistance
 nltk

@@ -7,7 +7,7 @@ Wilhelm Data Loader
 [![GitHub Workflow Status][GitHub Workflow Status badge]][GitHub Workflow Status URL]
 [![Apache License badge]][Apache License URL]
 
-Wilhelm Data Loader is a data pipeline that reads  [Wilhelm](https://wilhelmlang.com/)'s vocabulary data from supported
+Wilhelm Data Loader is a data pipeline that reads  [wilhelmlang.com]'s vocabulary data from supported
 data sources and loads them into graph databases
 
 Some features can be reused as SDK which can be installed via
@@ -17,6 +17,31 @@ pip install wilhelm_data_loader
 ```
 
 Details documentations can be found at [sdk.wilhelmlang.com](https://sdk.wilhelmlang.com/)
+
+Wiktionary Data Loader (Arango DB)
+----------------------------------
+
+[wilhelm-data-loader]() works naturally for single-tenant application, the [wilhelmlang.com]. In order to support
+cross-language inferencing, all data are hence loaded into a __single__
+[Database](https://arango.qubitpi.org/stable/concepts/data-structure/#databases). Data of each langauge resides in
+dedicated [Collections](https://arango.qubitpi.org/stable/concepts/data-structure/#collections)
+
+There are _n + 2_ Collections loaded:
+
+- _n_ document collections for n languages supported by [wiktionary-data](https://github.com/QubitPi/wiktionary-data)
+- _1_ document collection for "Definition" entity, where the English definition of each word resides in one
+  [document](https://arango.qubitpi.org/stable/concepts/data-structure/#documents)
+- _1_ edge collection for connections between words and definitions as well as those among words themselves
+
+> [!TIP]
+>
+> See [_Collection Types_](https://arango.qubitpi.org/stable/concepts/data-structure/collections/#collection-types) for
+> differences between document & edge collections
+
+Each collection generates index on the word term. If the term comes with a gender modifier, such as
+"das Audo" (_car_, in German), a new
+[computed attribute](https://arango.qubitpi.org/stable/concepts/data-structure/documents/computed-values/) that has
+the modifier stripped-off is used for indexing instead
 
 Development
 -----------
@@ -83,3 +108,5 @@ The use and distribution terms for [Wilhelm Graph Database Python SDK]() are cov
 
 [Read the Docs badge]: https://img.shields.io/readthedocs/wilhelm-data-loader?style=for-the-badge&logo=readthedocs&logoColor=white&label=Read%20the%20Docs&labelColor=8CA1AF
 [Read the Docs URL]: https://sdk.wilhelmlang.com
+
+[wilhelmlang.com]: https://wilhelmlang.com/
