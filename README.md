@@ -7,8 +7,8 @@ Wilhelm Data Loader
 [![GitHub Workflow Status][GitHub Workflow Status badge]][GitHub Workflow Status URL]
 [![Apache License badge]][Apache License URL]
 
-Wilhelm Data Loader is a data pipeline that reads  [wilhelmlang.com]'s vocabulary data from supported
-data sources and loads them into graph databases
+Wilhelm Data Loader is a bundle of data pipeline that reads [wilhelmlang.com]'s vocabulary from supported data sources
+and loads them into graph databases
 
 Some features can be reused as SDK which can be installed via
 
@@ -42,6 +42,23 @@ Each collection generates index on the word term. If the term comes with a gende
 "das Audo" (_car_, in German), a new
 [computed attribute](https://arango.qubitpi.org/stable/concepts/data-structure/documents/computed-values/) that has
 the modifier stripped-off is used for indexing instead
+
+Wilhelm Vocabulary Loader
+-------------------------
+
+the absolute fastest way (by far) to load large datasets into neo4j is to use the bulk loader
+
+The cache here is defined as the set of all connected components formed by all vocabularies.
+
+Computing cache directly within the webservice is not possible because Hugging Face Datasets does not have Java API.
+Common cache store such as Redis is overkill because this cache is going to be read-only.
+The best option is then a file-based cache
+
+### Computing Cache
+
+Since [wilhelm-vocabulary](https://github.com/QubitPi/wilhelm-vocabulary) is a highly personalized and __manually-made
+data set__, it is safe to assume the datasize won't be large. In fact, its no more than tens of thousands of nodes. This
+allows for simpler cache loading algorithm which is easier to maintain
 
 Development
 -----------
