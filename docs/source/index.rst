@@ -1,19 +1,24 @@
-==================
-Wilhelm Python SDK
-==================
+===================
+Wilhelm Data Loader
+===================
 
 .. contents:: Table of Contents
     :depth: 2
+
+
+Wilhelm Data Loader is a bundle of data pipeline that reads `wilhelmlang.com <https://wilhelmlang.com/>`_'s vocabulary
+from supported data sources and loads them into graph databases. Some features of it can be reused as SDK. This
+documentation walks you through how to use the SDK
 
 Install
 =======
 
 To install the SDK, simply run::
 
-    pip installwilhelm_data_loader
+    pip install wilhelm_data_loader
 
-Load Wilhelm Vocabularies into Neo4J Database
-=============================================
+Neo4J Database Client
+=====================
 
 1. Make ready a Neo4J database instance. A free one can be obtained at https://console.neo4j.io
 2. Set the following environment variables
@@ -25,20 +30,30 @@ Load Wilhelm Vocabularies into Neo4J Database
 
   where all of them are available when database is provisioned on https://console.neo4j.io
 
-3. Load vocabulary into Neo4J database:
+3. Load data into Neo4J database:
 
-  .. code-block:: python
+   .. code-block:: python
 
-     from wilhelm_python_sdk.german_neo4j_loader import load_into_database
 
-     if __name__ == "__main__":
-         load_into_database("german.yaml")
+      from database.neo4j.database_clients import get_database_client
+
+      with get_database_client() as database_client:
+          database_client.save_a_node_with_attributes("MyNoteType1", {"label": "My Node 1"})
+          database_client.save_a_node_with_attributes("MyNoteType2", {"label": "My Node 2"})
+
+          database_client.save_a_link_with_attributes(
+                language="English",
+                source_label="My Node 1",
+                target_label="My Node 2",
+                attributes={"label": "My Link"}
+            )
+
 
 If we would like to empty database, we can do
 
 .. code-block:: python
 
-   from wilhelm_python_sdk.database_manager import cleanup_neo4j
+   from database.neo4j.database_manager import cleanup_neo4j
 
    if __name__ == "__main__":
        cleanup_neo4j()
@@ -48,32 +63,12 @@ Note that this function targets the same database with the same credentials list
 API Documentation
 =================
 
-.. automodule:: wilhelm_python_sdk.german_loader
+.. automodule:: database.neo4j.database_clients
    :members:
    :undoc-members:
    :show-inheritance:
 
-.. automodule:: wilhelm_python_sdk.latin_loader
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
-.. automodule:: wilhelm_python_sdk.ancient_greek_loader
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
-.. automodule:: wilhelm_python_sdk.vocabulary_parser
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
-.. automodule:: wilhelm_python_sdk.database_clients
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
-.. automodule:: wilhelm_python_sdk.database_manager
+.. automodule:: database.neo4j.database_manager
    :members:
    :undoc-members:
    :show-inheritance:

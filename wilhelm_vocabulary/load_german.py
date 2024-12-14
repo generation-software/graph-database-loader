@@ -13,7 +13,7 @@
 # limitations under the License.
 from datasets import load_dataset
 
-from database.database_clients import get_database_client
+from database.neo4j.database_clients import get_database_client
 
 splitToLanguage = {
     "German": "German",
