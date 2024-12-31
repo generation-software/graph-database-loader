@@ -46,7 +46,20 @@ the modifier stripped-off is used for indexing instead
 Wilhelm Vocabulary Loader
 -------------------------
 
-the absolute fastest way (by far) to load large datasets into neo4j is to use the bulk loader
+> [!CAUTION]
+>
+> When the graph database is Neo4J, all constrains relating to the __Term__ node must be using:
+>
+> ```cypher
+> SHOW CONSTRAINTS
+> DROP CONSTRAINT constraint_name;
+> ```
+>
+> This is because certain vocabulary has multiple grammatical forms. This vocabulary is spread out as multiple entries.
+> These multiple entries, because they have lots of common properties, often triggers constraint violations in Neo4J on
+> load
+
+The absolute fastest way (by far) to load large datasets into neo4j is to use the bulk loader
 
 The cache here is defined as the set of all connected components formed by all vocabularies.
 
