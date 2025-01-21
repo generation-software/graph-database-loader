@@ -250,7 +250,7 @@ jobs:
         run: git fetch --tags origin
       - name: Build docs
         run: |
-          sphinx-multiversion docs doc_build/
+          sphinx-build docs doc_build/
       - name: Load CNAME
         run: echo sdk.wilhelm.qubitpi.org > doc_build/master/CNAME
       - name: Deploy
