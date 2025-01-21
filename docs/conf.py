@@ -9,13 +9,9 @@ from sphinx_github_style import get_linkcode_resolve
 project = "wilhelm-data-loader"
 copyright = f"2023 Jiaqi Liu"
 
-# The full version, including alpha/beta/rc tags
-top_level = project.replace("_", "-")
-
 linkcode_url = "https://github.com/QubitPi/wilhelm-data-loader"
 html_show_sourcelink = True
 
-smv_current_version = ""  # will by overwritten by sphinx-multi-version to the name of the tag or branch.
 html_context = {
     "display_github": True,
     "github_user": "QubitPi",
@@ -33,10 +29,7 @@ html_theme_options = {
 
 
 def linkcode_resolve(*args):
-    app = inspect.currentframe().f_back.f_locals.get("app")
-    current_version = app.config.smv_current_version
-    # use smv_current_version as the git url
-    real_linkcode_url = linkcode_url + f"/blob/{current_version}/" + "{filepath}#L{linestart}-L{linestop}"
+    real_linkcode_url = linkcode_url + f"/blob/master/" + "{filepath}#L{linestart}-L{linestop}"
     return get_linkcode_resolve(real_linkcode_url)(*args)
 
 
