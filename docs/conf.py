@@ -8,7 +8,7 @@ from sphinx_github_style import get_linkcode_resolve
 
 version = "0.0.72"
 release = "0.0.72"
-project = "wilhelm-data-loader"
+project = "wilhelm_data_loader"
 copyright = f"2023 Jiaqi Liu"
 
 linkcode_url = "https://github.com/QubitPi/wilhelm-data-loader"
