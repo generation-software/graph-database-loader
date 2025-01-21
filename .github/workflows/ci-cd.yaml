@@ -189,10 +189,17 @@ jobs:
   push-release-tag:
     needs: package
     if: github.ref == 'refs/heads/master'
-    uses: .github/workflows/version-bump.yml
-    with:
-      user: QubitPi
-      email: jack20220723@gmail.com
+    name: Bump Version
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+      - name: Tag for release
+        run: |
+          git config --global user.name QubitPi
+          git config --global user.email jack20220723@gmail.com
+          .github/tag-for-release.bash
 
   release:
     name: Publish Python SDK To PyPI
