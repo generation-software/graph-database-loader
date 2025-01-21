@@ -8,9 +8,8 @@ from sphinx_github_style import get_linkcode_resolve
 
 version = "0.15.0"
 release = "0.15.0"
-project = "flair"
-author = importlib_metadata.metadata(project)["Author"]
-copyright = f"2023 {author}"
+project = "wilhelm-data-loader"
+copyright = f"2023 Jiaqi Liu"
 
 # The full version, including alpha/beta/rc tags
 top_level = project.replace("-", "_")
@@ -21,8 +20,8 @@ html_show_sourcelink = True
 smv_current_version = ""  # will by overwritten by sphinx-multi-version to the name of the tag or branch.
 html_context = {
     "display_github": True,
-    "github_user": "flairNLP",
-    "github_repo": "flair",
+    "github_user": "QubitPi",
+    "github_repo": "wilhelm-data-loader",
     "github_version": "",
     "conf_py_path": "/docs/",
 }  # dummy value that sphinx-github-style won't crash when run in temp folder.
@@ -82,7 +81,7 @@ html_theme = "pydata_sphinx_theme"
 # relative to this directory. They are copied after the builtin static files,
 # so a file named "default.css" will overwrite the builtin "default.css".
 html_static_path = ["_static"]
-html_title = "Flair Documentation"
+html_title = "wilhelm-data-loader Documentation"
 
 html_css_files = [
     "css/main.css",
