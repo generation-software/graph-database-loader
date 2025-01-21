@@ -12,3 +12,5 @@ sphinx-autosummary-autocollect
 semver
 gensim
 bpemb
+
+sphinx==5.0.2
