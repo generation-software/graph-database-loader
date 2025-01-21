@@ -240,19 +240,18 @@ jobs:
           python-version: ${{ env.PYTHON_VERSION }}
       - name: Install Torch cpu
         run: pip install torch --index-url https://download.pytorch.org/whl/cpu
-      - name: Install Flair dependencies
+      - name: Install dependencies
         run: |
-          pip install -r requirements.txt
+          pip3 install -r requirements.txt
           pip3 install -e .
       - name: Install unittest dependencies
-        run: pip install -r requirements-dev.txt
+        run: pip3 install -r requirements-dev.txt
       - name: Install doc dependencies
-        run: pip install -r docs/requirements.txt
-      - name: Fetch git tags
-        run: git fetch --tags origin
+        run: pip3 install -r docs/requirements.txt
+      #- name: Fetch git tags
+      #  run: git fetch --tags origin
       - name: Build docs
-        run: |
-          sphinx-build docs doc_build/
+        run: sphinx-build docs doc_build/
       - name: Load CNAME
         run: echo sdk.wilhelm.qubitpi.org > doc_build/master/CNAME
       - name: Deploy
