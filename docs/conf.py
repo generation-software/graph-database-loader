@@ -14,7 +14,7 @@ copyright = f"2023 Jiaqi Liu"
 # The full version, including alpha/beta/rc tags
 top_level = project.replace("-", "_")
 
-linkcode_url = importlib_metadata.metadata(project)["Home-page"]
+linkcode_url = "https://github.com/QubitPi/wilhelm-data-loader"
 html_show_sourcelink = True
 
 smv_current_version = ""  # will by overwritten by sphinx-multi-version to the name of the tag or branch.
