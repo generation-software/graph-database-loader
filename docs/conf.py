@@ -8,7 +8,7 @@ from sphinx_github_style import get_linkcode_resolve
 
 version = "0.15.0"
 release = "0.15.0"
-project = "wilhelm-data-loader"
+project = "wilhelm_data_loader"
 copyright = f"2023 Jiaqi Liu"
 
 # The full version, including alpha/beta/rc tags
