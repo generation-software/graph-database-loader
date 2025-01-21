@@ -241,7 +241,9 @@ jobs:
       - name: Install Torch cpu
         run: pip install torch --index-url https://download.pytorch.org/whl/cpu
       - name: Install Flair dependencies
-        run: pip install -r requirements.txt
+        run: |
+          pip install -r requirements.txt
+          pip3 install -e .
       - name: Install unittest dependencies
         run: pip install -r requirements-dev.txt
       - name: Install doc dependencies
