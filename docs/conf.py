@@ -121,7 +121,7 @@ html_sidebars = {
     "index": [],
 }
 
-smv_latest_version = importlib_metadata.version(project)
+smv_latest_version = "latest"
 
 # Whitelist pattern for tags (set to None to ignore all tags)
 smv_tag_whitelist = r"^v\d+\.\d+\.\d+$"
