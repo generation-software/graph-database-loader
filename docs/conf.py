@@ -1,14 +1,11 @@
 # noqa: INP001
-import inspect
-
-import importlib_metadata
 
 # -- Project information -----------------------------------------------------
 from sphinx_github_style import get_linkcode_resolve
 
 version = "0.0.72"
 release = "0.0.72"
-project = "wilhelm_data_loader"
+project = "wilhelm-data-loader"
 copyright = f"2023 Jiaqi Liu"
 
 linkcode_url = "https://github.com/QubitPi/wilhelm-data-loader"
@@ -20,7 +17,7 @@ html_context = {
     "github_repo": "wilhelm-data-loader",
     "github_version": "",
     "conf_py_path": "/docs/",
-}  # dummy value that sphinx-github-style won't crash when run in temp folder.
+}
 
 html_theme_options = {
     "navbar_end": ["darkmode-toggle", "version-switcher", "navbar-icon-links"],
